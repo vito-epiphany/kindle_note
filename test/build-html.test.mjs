@@ -52,6 +52,11 @@ test('renderBookPage escapes content and renders editable note fields', () => {
   assert.doesNotMatch(renderBookPage({ ...books[0], title: '<script>' }), /<script>/);
   assert.match(html, /data-note-id="note-1"/);
   assert.doesNotMatch(html, /data-note-source=/);
+  assert.doesNotMatch(html, />笔记</);
+  assert.doesNotMatch(html, />读书笔记</);
+  assert.doesNotMatch(html, />原文标注</);
+  assert.doesNotMatch(html, /class="eyebrow"/);
+  assert.doesNotMatch(html, /class="detail-header"/);
   assert.match(html, /class="reader-shell"/);
   assert.match(html, /class="library-pane"/);
   assert.match(html, /class="note-list-pane"/);
@@ -89,6 +94,8 @@ test('book page layout fills the viewport without decorative frames', () => {
   assert.match(APP_CSS, /\.note-input\s*{[^}]*border: 0/s);
   assert.doesNotMatch(APP_CSS, /\.window-controls/);
   assert.doesNotMatch(APP_CSS, /\.detail-toolbar/);
+  assert.doesNotMatch(APP_CSS, /\.detail-header/);
+  assert.doesNotMatch(APP_CSS, /\.eyebrow/);
   assert.doesNotMatch(APP_CSS, /\.note-preview/);
 });
 

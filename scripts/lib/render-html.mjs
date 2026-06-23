@@ -159,11 +159,9 @@ export function renderBookPage(book, allBooks = [book]) {
     const meta = [chapter, note.location, note.page].filter(Boolean).join(' · ');
     const sourceText = note.quote || note.note || '空白笔记';
     const searchable = `${note.quote || ''} ${note.note || ''} ${chapter} ${tags.join(' ')}`.toLowerCase();
-    const title = note.quote ? '原文标注' : '读书笔记';
     const isActive = note.id === firstNoteId;
 
     return `<button type="button" class="note-list-item" data-note-target="${escapeAttribute(note.id)}" data-chapter="${escapeAttribute(chapter)}" data-search="${escapeAttribute(searchable)}" aria-current="${isActive ? 'true' : 'false'}">
-        <strong>${escapeHtml(title)}</strong>
         <span>${escapeHtml(sourceText)}</span>
         <small>${escapeHtml(meta || 'No location')}</small>
       </button>`;
@@ -183,13 +181,9 @@ export function renderBookPage(book, allBooks = [book]) {
     const isActive = note.id === firstNoteId;
 
     return `<article class="note detail-card" data-note-id="${escapeAttribute(note.id)}" data-chapter="${escapeAttribute(chapter)}" data-search="${escapeAttribute(searchable)}"${isActive ? '' : ' hidden'}>
-      <header class="detail-header">
-        <h1>${note.quote ? '原文标注' : '读书笔记'}</h1>
-      </header>
       <p class="meta">${escapeHtml(meta || 'No location')}</p>
       ${quoteBlock}
       <section class="note-markdown">
-        <h2>笔记</h2>
         <textarea class="note-input" data-note-input aria-label="Markdown note">${escapeHtml(noteText)}</textarea>
       </section>
     </article>`;
@@ -217,7 +211,6 @@ export function renderBookPage(book, allBooks = [book]) {
     <aside class="note-list-pane">
       <header class="list-header">
         <div>
-          <p class="eyebrow">笔记</p>
           <h1>${escapeHtml(book.title)}</h1>
           <p>${escapeHtml(book.author || 'Unknown author')}</p>
         </div>

@@ -238,12 +238,6 @@ textarea:focus {
   font-size: 14px;
 }
 
-.eyebrow {
-  color: var(--accent);
-  font-size: 13px;
-  font-weight: 700;
-}
-
 .note-list-item {
   display: grid;
   width: 100%;
@@ -262,11 +256,6 @@ textarea:focus {
   border-left-color: var(--accent);
   background: var(--panel);
   box-shadow: 0 8px 20px rgba(40, 45, 48, 0.06);
-}
-
-.note-list-item strong {
-  font-size: 16px;
-  line-height: 1.25;
 }
 
 .note-list-item span {
@@ -299,26 +288,13 @@ textarea:focus {
   margin: 0 auto;
 }
 
-.detail-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 18px;
-}
-
-.detail-header h1 {
-  font-size: clamp(30px, 4vw, 48px);
-  line-height: 1.1;
-}
-
 .quote-block,
 .note-markdown {
   display: grid;
   gap: 12px;
 }
 
-.quote-block h2,
-.note-markdown h2 {
+.quote-block h2 {
   font-size: 18px;
 }
 
