@@ -42,6 +42,14 @@ function describeImportError(error) {
   return String(error);
 }
 
+function logWarnings(warnings) {
+  for (const warning of warnings) {
+    const path = warning?.path || 'unknown';
+    const reason = warning?.reason || 'Unknown warning';
+    console.warn(`Warning for ${path}: ${reason}`);
+  }
+}
+
 await mkdir(importsDir, { recursive: true });
 await mkdir(dataDir, { recursive: true });
 
@@ -71,6 +79,7 @@ for (const path of entries) {
     if (sourceByKey.has(sourceKey)) continue;
 
     const parsed = parseKindleSource(raw, { path: displayPath });
+    logWarnings(parsed.warnings);
     nextSources.push({
       path: displayPath,
       sha256: digest,

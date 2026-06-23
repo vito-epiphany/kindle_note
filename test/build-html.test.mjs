@@ -37,6 +37,8 @@ test('renderIndexPage includes search and book links', () => {
   assert.match(html, /<input[^>]+id="search"/);
   assert.match(html, /Deep Work/);
   assert.match(html, /books\/book-deep-work-cal-newport.html/);
+  assert.match(html, /Last import:/);
+  assert.match(html, /2026-06-23 00:00 UTC/);
 });
 
 test('renderBookPage escapes content and renders extension fields', () => {
@@ -64,5 +66,24 @@ test('build-html removes stale book pages that are no longer in books.json', asy
   await assert.doesNotReject(readFile(join(publicDir, 'index.html'), 'utf8'));
   await assert.doesNotReject(readFile(join(booksDir, 'book-deep-work-cal-newport.html'), 'utf8'));
   await assert.rejects(readFile(join(booksDir, 'book-old-title.html'), 'utf8'), { code: 'ENOENT' });
+  assert.match(stdout, /Built 1 book page\(s\)\./);
+});
+
+test('build-html rebuilds referenced app assets from data/books.json', async () => {
+  const tempDir = await mkdtemp(join(tmpdir(), 'kindle-build-assets-'));
+  const dataDir = join(tempDir, 'data');
+  const publicDir = join(tempDir, 'public');
+  const assetsDir = join(publicDir, 'assets');
+
+  await mkdir(dataDir, { recursive: true });
+  await mkdir(assetsDir, { recursive: true });
+  await writeFile(join(dataDir, 'books.json'), `${JSON.stringify([books[0]], null, 2)}\n`);
+
+  const { stdout } = await execFileAsync('node', [buildScriptPath], { cwd: tempDir });
+  const css = await readFile(join(assetsDir, 'app.css'), 'utf8');
+  const js = await readFile(join(assetsDir, 'app.js'), 'utf8');
+
+  assert.match(css, /--accent:/);
+  assert.match(js, /search/i);
   assert.match(stdout, /Built 1 book page\(s\)\./);
 });

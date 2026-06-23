@@ -61,3 +61,33 @@ test('importer keeps processing after a per-file failure', async () => {
     await chmod(badPath, 0o644).catch(() => {});
   }
 });
+
+test('importer prints parser warnings for unsupported or malformed files', async () => {
+  const tempDir = await mkdtemp(join(tmpdir(), 'kindle-import-warnings-'));
+  const importsDir = join(tempDir, 'imports');
+  const dataDir = join(tempDir, 'data');
+
+  await mkdir(importsDir, { recursive: true });
+  await mkdir(dataDir, { recursive: true });
+
+  await writeFile(join(importsDir, 'unsupported.txt'), [
+    'This is not a Kindle note export.',
+    'It has no title, metadata, or highlight blocks.'
+  ].join('\n'));
+
+  const { stdout, stderr } = await execFileAsync('node', [scriptPath], { cwd: tempDir });
+  const sources = JSON.parse(await readFile(join(dataDir, 'sources.json'), 'utf8'));
+
+  assert.match(stdout, /Scanned 1 source file\(s\)\./);
+  assert.match(stdout, /Imported 0 file\(s\)\./);
+  assert.match(stdout, /Parsed 0 note\(s\)\./);
+  assert.match(stderr, /imports\/unsupported\.txt/);
+  assert.match(stderr, /No Kindle highlight blocks found/);
+
+  assert.equal(sources.length, 1);
+  assert.equal(sources[0].notesFound, 0);
+  assert.equal(sources[0].warnings.length, 1);
+  assert.equal(sources[0].warnings[0].path, 'imports/unsupported.txt');
+  assert.equal(sources[0].warnings[0].reason, 'No Kindle highlight blocks found');
+  assert.equal(sources[0].error, undefined);
+});

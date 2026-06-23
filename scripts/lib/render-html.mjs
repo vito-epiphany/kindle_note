@@ -28,17 +28,27 @@ function normalizeList(value) {
   return Array.isArray(value) ? value : [];
 }
 
+function formatImportTime(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return 'Unknown import time';
+  }
+
+  return `${date.toISOString().slice(0, 16).replace('T', ' ')} UTC`;
+}
+
 export function renderIndexPage(books) {
   const items = normalizeList(books).map((book) => {
     const notes = normalizeList(book.notes);
     const href = `books/${book.id}.html`;
     const searchable = `${book.title} ${book.author} ${notes.map((note) => note.quote).join(' ')}`;
+    const lastImportTime = formatImportTime(book.lastImportedAt);
 
     return `<article class="book-card" data-search="${escapeHtml(searchable.toLowerCase())}">
       <a href="${escapeHtml(href)}">
         <h2>${escapeHtml(book.title)}</h2>
         <p>${escapeHtml(book.author || 'Unknown author')}</p>
-        <span>${notes.length} notes</span>
+        <p class="meta">${notes.length} notes · Last import: ${escapeHtml(lastImportTime)}</p>
       </a>
     </article>`;
   }).join('\n');
