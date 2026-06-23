@@ -109,16 +109,16 @@ textarea:focus {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
   overflow: auto;
   background: var(--rail);
   color: var(--rail-text);
-  padding: 34px 22px 24px;
+  padding: 30px 18px 24px;
 }
 
 .library-section {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .section-toggle {
@@ -126,12 +126,12 @@ textarea:focus {
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  min-height: 30px;
+  min-height: 28px;
   border: 0;
   border-radius: 6px;
   background: transparent;
   color: var(--rail-muted);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0;
   padding: 0 4px;
@@ -151,19 +151,19 @@ textarea:focus {
 .note-list,
 .notes {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .library-book,
 .chapter-link {
   display: grid;
   min-width: 0;
-  gap: 2px;
+  gap: 1px;
   border: 0;
   border-radius: 8px;
   background: transparent;
   color: var(--rail-muted);
-  padding: 9px 10px;
+  padding: 8px 10px;
   text-align: left;
   text-decoration: none;
 }
@@ -181,20 +181,20 @@ textarea:focus {
 }
 
 .library-book span {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
   line-height: 1.25;
 }
 
 .library-book small {
   color: inherit;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.35;
   opacity: 0.72;
 }
 
 .chapter-link span {
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 650;
   line-height: 1.25;
 }
