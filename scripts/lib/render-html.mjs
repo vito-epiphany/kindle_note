@@ -191,7 +191,7 @@ export function renderBookPage(book, allBooks = [book]) {
 
   return pageShell({
     title: `${book.title} - Kindle Notes`,
-    body: `  <main class="reader-shell">
+    body: `  <main class="reader-shell" data-reader-shell>
     <aside class="library-pane">
       <section class="library-section">
         <button type="button" class="section-toggle" data-collapse-target="books" aria-expanded="true">
@@ -208,6 +208,7 @@ export function renderBookPage(book, allBooks = [book]) {
         <div class="chapter-list" data-collapse-panel="chapters">${chapterItems}</div>
       </section>
     </aside>
+    <div class="sidebar-resizer" data-sidebar-resizer role="separator" aria-label="调整侧边栏宽度" aria-orientation="vertical" tabindex="0"></div>
     <aside class="note-list-pane">
       <header class="list-header">
         <div>

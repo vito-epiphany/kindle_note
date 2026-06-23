@@ -14,6 +14,7 @@ export const APP_CSS = `:root {
   --accent: #e6525e;
   --accent-soft: #fff0f2;
   --shadow: 0 24px 70px rgba(37, 39, 41, 0.18);
+  --library-width: 320px;
 }
 
 * {
@@ -95,7 +96,7 @@ textarea:focus {
 
 .reader-shell {
   display: grid;
-  grid-template-columns: 320px 430px minmax(0, 1fr);
+  grid-template-columns: var(--library-width) 8px 430px minmax(0, 1fr);
   min-height: 100vh;
   margin: 0;
   overflow: hidden;
@@ -114,6 +115,34 @@ textarea:focus {
   background: var(--rail);
   color: var(--rail-text);
   padding: 30px 18px 24px;
+}
+
+.sidebar-resizer {
+  position: relative;
+  width: 8px;
+  min-width: 8px;
+  border: 0;
+  background: var(--paper);
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.sidebar-resizer::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 1px;
+  background: var(--line);
+  content: "";
+  opacity: 0.75;
+}
+
+.sidebar-resizer:hover::before,
+.sidebar-resizer:focus-visible::before,
+.reader-shell[data-resizing-sidebar="true"] .sidebar-resizer::before {
+  background: var(--accent);
+  opacity: 1;
 }
 
 .library-section {
@@ -362,7 +391,7 @@ pre {
 
 @media (max-width: 1020px) {
   .reader-shell {
-    grid-template-columns: 250px minmax(300px, 380px) minmax(0, 1fr);
+    grid-template-columns: var(--library-width) 8px minmax(300px, 380px) minmax(0, 1fr);
   }
 
   .detail-pane {
@@ -382,9 +411,14 @@ pre {
   }
 
   .library-pane,
+  .sidebar-resizer,
   .note-list-pane,
   .detail-pane {
     overflow: visible;
+  }
+
+  .sidebar-resizer {
+    display: none;
   }
 
   .library-pane {
@@ -399,12 +433,72 @@ pre {
 `;
 
 export const APP_JS = `const search = document.querySelector('#search');
+const readerShell = document.querySelector('[data-reader-shell]');
+const sidebarResizer = document.querySelector('[data-sidebar-resizer]');
 const chapterButtons = [...document.querySelectorAll('[data-chapter-filter]')];
 const noteListItems = [...document.querySelectorAll('[data-note-target]')];
 const detailCards = [...document.querySelectorAll('.detail-card[data-note-id]')];
 const collapseButtons = [...document.querySelectorAll('[data-collapse-target]')];
 let activeChapter = chapterButtons.find((button) => button.getAttribute('aria-current') === 'true')?.dataset.chapterFilter || chapterButtons[0]?.dataset.chapterFilter || '';
 let activeSearchQuery = '';
+
+function clampSidebarWidth(value) {
+  return Math.min(460, Math.max(220, Math.round(value)));
+}
+
+function setSidebarWidth(value, options = {}) {
+  if (!readerShell) return;
+
+  const width = clampSidebarWidth(value);
+  readerShell.style.setProperty('--library-width', width + 'px');
+
+  if (options.persist === false) return;
+
+  try {
+    localStorage.setItem('kindle-note:library-width', width + 'px');
+  } catch {
+    // Width changes still apply for the current page without persisted storage.
+  }
+}
+
+if (readerShell && sidebarResizer) {
+  try {
+    const savedWidth = localStorage.getItem('kindle-note:library-width');
+    if (savedWidth) {
+      setSidebarWidth(Number.parseInt(savedWidth, 10), { persist: false });
+    }
+  } catch {
+    // Local files can run in browser modes where storage is unavailable.
+  }
+
+  sidebarResizer.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+    readerShell.dataset.resizingSidebar = 'true';
+    sidebarResizer.setPointerCapture?.(event.pointerId);
+
+    const shellLeft = readerShell.getBoundingClientRect().left;
+    const updateFromPointer = (pointerEvent) => {
+      setSidebarWidth(pointerEvent.clientX - shellLeft);
+    };
+    const stopResize = () => {
+      delete readerShell.dataset.resizingSidebar;
+      window.removeEventListener('pointermove', updateFromPointer);
+    };
+
+    updateFromPointer(event);
+    window.addEventListener('pointermove', updateFromPointer);
+    window.addEventListener('pointerup', stopResize, { once: true });
+    window.addEventListener('pointercancel', stopResize, { once: true });
+  });
+
+  sidebarResizer.addEventListener('keydown', (event) => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+
+    event.preventDefault();
+    const currentWidth = Number.parseInt(getComputedStyle(readerShell).getPropertyValue('--library-width'), 10) || 320;
+    setSidebarWidth(currentWidth + (event.key === 'ArrowRight' ? 16 : -16));
+  });
+}
 
 function selectNote(noteId) {
   if (!noteId) return;

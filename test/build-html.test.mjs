@@ -58,7 +58,10 @@ test('renderBookPage escapes content and renders editable note fields', () => {
   assert.doesNotMatch(html, /class="eyebrow"/);
   assert.doesNotMatch(html, /class="detail-header"/);
   assert.match(html, /class="reader-shell"/);
+  assert.match(html, /data-reader-shell/);
   assert.match(html, /class="library-pane"/);
+  assert.match(html, /class="sidebar-resizer"/);
+  assert.match(html, /aria-label="调整侧边栏宽度"/);
   assert.match(html, /class="note-list-pane"/);
   assert.match(html, /class="detail-pane"/);
   assert.match(html, /data-collapse-target="books"/);
@@ -87,9 +90,12 @@ test('renderBookPage escapes content and renders editable note fields', () => {
 });
 
 test('book page layout fills the viewport without decorative frames', () => {
-  assert.match(APP_CSS, /\.reader-shell\s*{[^}]*grid-template-columns: 320px 430px minmax\(0, 1fr\)/s);
+  assert.match(APP_CSS, /--library-width: 320px/);
+  assert.match(APP_CSS, /\.reader-shell\s*{[^}]*grid-template-columns: var\(--library-width\) 8px 430px minmax\(0, 1fr\)/s);
   assert.match(APP_CSS, /\.reader-shell\s*{[^}]*min-height: 100vh/s);
   assert.match(APP_CSS, /\.reader-shell\s*{[^}]*margin: 0/s);
+  assert.match(APP_CSS, /\.sidebar-resizer\s*{/);
+  assert.match(APP_CSS, /cursor: col-resize/);
   assert.match(APP_CSS, /\.note-input\s*{[^}]*min-height: 320px/s);
   assert.match(APP_CSS, /\.note-input\s*{[^}]*border: 0/s);
   assert.doesNotMatch(APP_CSS, /\.window-controls/);
@@ -108,6 +114,16 @@ test('sidebar sections are collapsible and typographic hierarchy is explicit', (
   assert.match(APP_JS, /data-collapse-target/);
   assert.match(APP_JS, /aria-expanded/);
   assert.match(APP_JS, /data-collapse-panel/);
+});
+
+test('app asset includes resizable sidebar behavior', () => {
+  assert.match(APP_JS, /data-sidebar-resizer/);
+  assert.match(APP_JS, /--library-width/);
+  assert.match(APP_JS, /localStorage\.getItem\('kindle-note:library-width'\)/);
+  assert.match(APP_JS, /localStorage\.setItem\('kindle-note:library-width'/);
+  assert.match(APP_JS, /pointerdown/);
+  assert.match(APP_JS, /pointermove/);
+  assert.match(APP_JS, /Math\.min\(460, Math\.max\(220/);
 });
 
 test('renderBookPage sorts chapters and notes by chapter order', () => {

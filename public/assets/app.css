@@ -14,6 +14,7 @@
   --accent: #e6525e;
   --accent-soft: #fff0f2;
   --shadow: 0 24px 70px rgba(37, 39, 41, 0.18);
+  --library-width: 320px;
 }
 
 * {
@@ -95,7 +96,7 @@ textarea:focus {
 
 .reader-shell {
   display: grid;
-  grid-template-columns: 320px 430px minmax(0, 1fr);
+  grid-template-columns: var(--library-width) 8px 430px minmax(0, 1fr);
   min-height: 100vh;
   margin: 0;
   overflow: hidden;
@@ -114,6 +115,34 @@ textarea:focus {
   background: var(--rail);
   color: var(--rail-text);
   padding: 30px 18px 24px;
+}
+
+.sidebar-resizer {
+  position: relative;
+  width: 8px;
+  min-width: 8px;
+  border: 0;
+  background: var(--paper);
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.sidebar-resizer::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 1px;
+  background: var(--line);
+  content: "";
+  opacity: 0.75;
+}
+
+.sidebar-resizer:hover::before,
+.sidebar-resizer:focus-visible::before,
+.reader-shell[data-resizing-sidebar="true"] .sidebar-resizer::before {
+  background: var(--accent);
+  opacity: 1;
 }
 
 .library-section {
@@ -362,7 +391,7 @@ pre {
 
 @media (max-width: 1020px) {
   .reader-shell {
-    grid-template-columns: 250px minmax(300px, 380px) minmax(0, 1fr);
+    grid-template-columns: var(--library-width) 8px minmax(300px, 380px) minmax(0, 1fr);
   }
 
   .detail-pane {
@@ -382,9 +411,14 @@ pre {
   }
 
   .library-pane,
+  .sidebar-resizer,
   .note-list-pane,
   .detail-pane {
     overflow: visible;
+  }
+
+  .sidebar-resizer {
+    display: none;
   }
 
   .library-pane {
