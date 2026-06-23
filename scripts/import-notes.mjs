@@ -25,12 +25,31 @@ function extensionOf(path) {
   return match ? match[0].toLowerCase() : '';
 }
 
+function describeImportError(error) {
+  if (error && typeof error === 'object') {
+    const parts = [];
+    if (typeof error.code === 'string' && error.code) {
+      parts.push(error.code);
+    }
+    if (typeof error.message === 'string' && error.message) {
+      parts.push(error.message);
+    }
+    if (parts.length > 0) {
+      return parts.join(': ');
+    }
+  }
+
+  return String(error);
+}
+
 await mkdir(importsDir, { recursive: true });
 await mkdir(dataDir, { recursive: true });
 
 const existingBooks = await readJson(booksPath, []);
 const existingSources = await readJson(sourcesPath, []);
-const sourceByKey = new Map(existingSources.map((source) => [`${source.path}:${source.sha256}`, source]));
+const sourceByKey = new Map(existingSources
+  .filter((source) => !source.error && typeof source.sha256 === 'string' && source.sha256.length > 0)
+  .map((source) => [`${source.path}:${source.sha256}`, source]));
 const entries = (await readdir(importsDir, { withFileTypes: true }))
   .filter((entry) => entry.isFile())
   .map((entry) => join(importsDir, entry.name))
@@ -41,25 +60,40 @@ const nextSources = [...existingSources];
 let importedFiles = 0;
 
 for (const path of entries) {
-  const raw = await readFile(path, 'utf8');
-  const digest = sha256(raw);
   const displayPath = relative(root, path);
-  const sourceKey = `${displayPath}:${digest}`;
+  let digest = null;
 
-  if (sourceByKey.has(sourceKey)) continue;
+  try {
+    const raw = await readFile(path, 'utf8');
+    digest = sha256(raw);
+    const sourceKey = `${displayPath}:${digest}`;
 
-  const parsed = parseKindleSource(raw, { path: displayPath });
-  nextSources.push({
-    path: displayPath,
-    sha256: digest,
-    importedAt: new Date().toISOString(),
-    notesFound: parsed.books.reduce((sum, book) => sum + book.notes.length, 0),
-    warnings: parsed.warnings
-  });
+    if (sourceByKey.has(sourceKey)) continue;
 
-  if (parsed.books.length > 0) {
-    allIncomingBooks.push(...parsed.books);
-    importedFiles += 1;
+    const parsed = parseKindleSource(raw, { path: displayPath });
+    nextSources.push({
+      path: displayPath,
+      sha256: digest,
+      importedAt: new Date().toISOString(),
+      notesFound: parsed.books.reduce((sum, book) => sum + book.notes.length, 0),
+      warnings: parsed.warnings
+    });
+
+    if (parsed.books.length > 0) {
+      allIncomingBooks.push(...parsed.books);
+      importedFiles += 1;
+    }
+  } catch (error) {
+    const reason = describeImportError(error);
+    nextSources.push({
+      path: displayPath,
+      sha256: digest,
+      importedAt: new Date().toISOString(),
+      notesFound: 0,
+      warnings: [{ path: displayPath, reason }],
+      error: true
+    });
+    console.warn(`Skipping ${displayPath}: ${reason}`);
   }
 }
 
