@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "path": "imports/kindle-sample.txt",
+    "sha256": "a4a1e9a5d92a6c521a7aac78d5333d4ae549f0311315d61fd7c21650ab8347c7",
+    "importedAt": "2026-06-23T10:03:15.359Z",
+    "notesFound": 3,
+    "warnings": []
+  }
+]
