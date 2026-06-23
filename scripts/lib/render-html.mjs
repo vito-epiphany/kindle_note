@@ -41,6 +41,65 @@ function formatImportTime(value) {
   return `${date.toISOString().slice(0, 16).replace('T', ' ')} UTC`;
 }
 
+const chineseNumeralValues = new Map([
+  ['零', 0],
+  ['〇', 0],
+  ['一', 1],
+  ['二', 2],
+  ['两', 2],
+  ['三', 3],
+  ['四', 4],
+  ['五', 5],
+  ['六', 6],
+  ['七', 7],
+  ['八', 8],
+  ['九', 9]
+]);
+
+function parseChineseInteger(value) {
+  const text = String(value || '').trim();
+  if (/^\d+$/.test(text)) return Number(text);
+  if (text === '十') return 10;
+
+  const tenIndex = text.indexOf('十');
+  if (tenIndex >= 0) {
+    const before = text.slice(0, tenIndex);
+    const after = text.slice(tenIndex + 1);
+    const tens = before ? chineseNumeralValues.get(before) : 1;
+    const ones = after ? chineseNumeralValues.get(after) : 0;
+    return (tens ?? 0) * 10 + (ones ?? 0);
+  }
+
+  return chineseNumeralValues.get(text);
+}
+
+function chapterSortValue(chapter) {
+  const match = String(chapter || '').match(/第\s*([一二两三四五六七八九十〇零\d]+)\s*章/);
+  const value = match ? parseChineseInteger(match[1]) : undefined;
+  return Number.isFinite(value) ? value : Number.POSITIVE_INFINITY;
+}
+
+function numberFromText(value) {
+  const match = String(value || '').match(/\d+/);
+  return match ? Number(match[0]) : Number.POSITIVE_INFINITY;
+}
+
+function compareNotesByReadingOrder(a, b) {
+  const chapterDiff = chapterSortValue(a.chapter) - chapterSortValue(b.chapter);
+  if (chapterDiff !== 0) return chapterDiff;
+
+  const chapterNameDiff = String(a.chapter || '').localeCompare(String(b.chapter || ''));
+  if (chapterNameDiff !== 0) return chapterNameDiff;
+
+  const pageDiff = numberFromText(a.page) - numberFromText(b.page);
+  if (pageDiff !== 0) return pageDiff;
+
+  const locationDiff = numberFromText(a.location) - numberFromText(b.location);
+  if (locationDiff !== 0) return locationDiff;
+
+  return String(a.id || '').localeCompare(String(b.id || ''));
+}
+
 export function renderIndexPage(books) {
   const items = normalizeList(books).map((book) => {
     const notes = normalizeList(book.notes);
@@ -71,7 +130,7 @@ export function renderIndexPage(books) {
 }
 
 export function renderBookPage(book, allBooks = [book]) {
-  const bookNotes = normalizeList(book.notes);
+  const bookNotes = [...normalizeList(book.notes)].sort(compareNotesByReadingOrder);
   const normalizedBooks = normalizeList(allBooks);
   const chapters = [...new Set(bookNotes.map((note) => note.chapter || '未分章'))];
   const activeChapter = chapters[0] || '未分章';

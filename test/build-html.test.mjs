@@ -103,6 +103,45 @@ test('sidebar sections are collapsible and typographic hierarchy is explicit', (
   assert.match(APP_JS, /data-collapse-panel/);
 });
 
+test('renderBookPage sorts chapters and notes by chapter order', () => {
+  const outOfOrderBook = {
+    ...books[0],
+    notes: [{
+      ...books[0].notes[0],
+      id: 'note-third',
+      quote: 'Third chapter quote.',
+      note: 'Third note.',
+      chapter: '第三章 返乡',
+      page: '第 39 页',
+      location: '位置 547'
+    }, {
+      ...books[0].notes[0],
+      id: 'note-first',
+      quote: '',
+      note: 'First note.',
+      chapter: '第一章 保就业',
+      page: '第 8 页',
+      location: '位置 87'
+    }, {
+      ...books[0].notes[0],
+      id: 'note-second',
+      quote: 'Second chapter quote.',
+      note: 'Second note.',
+      chapter: '第二章 大学生',
+      page: '第 24 页',
+      location: '位置 314'
+    }]
+  };
+  const html = renderBookPage(outOfOrderBook, [outOfOrderBook]);
+
+  assert.ok(html.indexOf('data-chapter-filter="第一章 保就业"') < html.indexOf('data-chapter-filter="第二章 大学生"'));
+  assert.ok(html.indexOf('data-chapter-filter="第二章 大学生"') < html.indexOf('data-chapter-filter="第三章 返乡"'));
+  assert.ok(html.indexOf('data-note-target="note-first"') < html.indexOf('data-note-target="note-second"'));
+  assert.ok(html.indexOf('data-note-target="note-second"') < html.indexOf('data-note-target="note-third"'));
+  assert.ok(html.indexOf('data-note-id="note-first"') < html.indexOf('data-note-id="note-second"'));
+  assert.ok(html.indexOf('data-note-id="note-second"') < html.indexOf('data-note-id="note-third"'));
+});
+
 test('build-html removes stale book pages that are no longer in books.json', async () => {
   const tempDir = await mkdtemp(join(tmpdir(), 'kindle-build-'));
   const dataDir = join(tempDir, 'data');
