@@ -104,10 +104,72 @@ blockquote {
   padding: 2px 8px;
 }
 
-.extension {
-  white-space: pre-wrap;
-}
-
 [hidden] {
   display: none !important;
+}
+
+.extension {
+  display: grid;
+  gap: 10px;
+}
+
+.extension-preview {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+
+.extension-preview p,
+.extension-preview ul,
+.extension-preview ol,
+.extension-preview blockquote,
+.extension-preview pre,
+.extension-preview h1,
+.extension-preview h2,
+.extension-preview h3 {
+  margin: 0 0 10px;
+}
+
+.extension-preview code {
+  background: var(--bg);
+  border-radius: 4px;
+  padding: 1px 4px;
+}
+
+.extension-editor textarea {
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px;
+  font: inherit;
+}
+
+.extension-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+button {
+  width: fit-content;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  min-height: 36px;
+  padding: 0 12px;
+  font: inherit;
+}
+
+button:not(:disabled) {
+  cursor: pointer;
+}
+
+button:disabled {
+  color: var(--muted);
+}
+
+pre {
+  overflow-x: auto;
 }

@@ -20,7 +20,7 @@ await writeFile(join(assetsDir, 'app.js'), APP_JS);
 const currentBookFiles = new Set(books.map((book) => `${book.id}.html`));
 
 for (const book of books) {
-  await writeFile(join(booksDir, `${book.id}.html`), renderBookPage(book));
+  await writeFile(join(booksDir, `${book.id}.html`), renderBookPage(book, books));
 }
 
 for (const entry of await readdir(booksDir, { withFileTypes: true })) {

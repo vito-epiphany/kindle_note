@@ -7,6 +7,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { renderBookPage, renderIndexPage } from '../scripts/lib/render-html.mjs';
+import { APP_JS } from '../scripts/lib/site-assets.mjs';
 
 const execFileAsync = promisify(execFile);
 const buildScriptPath = fileURLToPath(new URL('../scripts/build-html.mjs', import.meta.url));
@@ -42,11 +43,20 @@ test('renderIndexPage includes search and book links', () => {
 });
 
 test('renderBookPage escapes content and renders extension fields', () => {
-  const html = renderBookPage(books[0]);
+  const html = renderBookPage(books[0], books);
   assert.match(html, /Focus deeply on cognitively demanding tasks\./);
   assert.match(html, /Connect this to planning blocks\./);
   assert.match(html, /attention/);
   assert.doesNotMatch(renderBookPage({ ...books[0], title: '<script>' }), /<script>/);
+  assert.match(html, /data-note-id="note-1"/);
+  assert.match(html, /data-extension-source="Connect this to planning blocks\."/);
+  assert.match(html, /class="extension-preview"/);
+  assert.match(html, /class="extension-editor"/);
+  assert.match(html, /data-action="edit-extension"/);
+  assert.match(html, /data-action="apply-extension"/);
+  assert.match(html, /data-action="cancel-extension"/);
+  assert.match(html, /id="export-json"/);
+  assert.match(html, /<script type="application\/json" id="books-data">/);
 });
 
 test('build-html removes stale book pages that are no longer in books.json', async () => {
@@ -86,4 +96,14 @@ test('build-html rebuilds referenced app assets from data/books.json', async () 
   assert.match(css, /--accent:/);
   assert.match(js, /search/i);
   assert.match(stdout, /Built 1 book page\(s\)\./);
+});
+
+test('app asset includes markdown editing and export behavior', () => {
+  assert.match(APP_JS, /function renderMarkdown/);
+  assert.match(APP_JS, /escapeHtml/);
+  assert.match(APP_JS, /edit-extension/);
+  assert.match(APP_JS, /apply-extension/);
+  assert.match(APP_JS, /cancel-extension/);
+  assert.match(APP_JS, /export-json/);
+  assert.match(APP_JS, /new Blob/);
 });

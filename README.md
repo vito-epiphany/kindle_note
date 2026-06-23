@@ -17,6 +17,16 @@ Local Kindle note library for importing saved Kindle note files, preserving pers
 
 Manual note extensions live in `data/books.json` under each note's `extension`, `tags`, and `status` fields. Re-importing the same Kindle note preserves those fields.
 
+## Editing Markdown Extensions
+
+Book pages let you edit each note's `extension` field as Markdown. Click `Edit`, write Markdown, click `Apply`, then use `Export books.json` to download updated data.
+
+Because the site is static, the browser does not write directly to local files. Replace `data/books.json` with the exported file, then run:
+
+```bash
+npm run build
+```
+
 ## Commands
 
 ```bash
