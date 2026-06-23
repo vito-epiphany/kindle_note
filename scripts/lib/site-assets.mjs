@@ -151,20 +151,28 @@ textarea:focus {
 }
 
 .section-toggle {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  justify-content: space-between;
+  column-gap: 10px;
   width: 100%;
-  min-height: 28px;
+  min-height: 34px;
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: var(--rail-muted);
-  font-size: 12px;
-  font-weight: 700;
+  color: var(--rail-text);
+  font-size: 14px;
+  font-weight: 900;
   letter-spacing: 0;
   padding: 0 4px;
   text-align: left;
+}
+
+.section-toggle::after {
+  display: block;
+  height: 1px;
+  background: rgba(243, 244, 242, 0.22);
+  content: "";
 }
 
 .section-toggle[aria-expanded="false"] span:last-child {
@@ -172,6 +180,7 @@ textarea:focus {
 }
 
 .section-toggle span:last-child {
+  color: var(--rail-muted);
   transition: transform 120ms ease;
 }
 

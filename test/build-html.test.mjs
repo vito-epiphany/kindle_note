@@ -106,7 +106,11 @@ test('book page layout fills the viewport without decorative frames', () => {
 });
 
 test('sidebar sections are collapsible and typographic hierarchy is explicit', () => {
-  assert.match(APP_CSS, /\.section-toggle\s*{[^}]*font-size: 12px/s);
+  assert.match(APP_CSS, /\.section-toggle\s*{[^}]*color: var\(--rail-text\)/s);
+  assert.match(APP_CSS, /\.section-toggle\s*{[^}]*font-size: 14px/s);
+  assert.match(APP_CSS, /\.section-toggle\s*{[^}]*font-weight: 900/s);
+  assert.match(APP_CSS, /\.section-toggle::after\s*{/);
+  assert.match(APP_CSS, /\.section-toggle::after\s*{[^}]*background: rgba\(243, 244, 242, 0\.22\)/s);
   assert.match(APP_CSS, /\.library-book span\s*{[^}]*font-size: 15px/s);
   assert.match(APP_CSS, /\.library-book small\s*{[^}]*font-size: 12px/s);
   assert.match(APP_CSS, /\.chapter-link span\s*{[^}]*font-size: 13px/s);
