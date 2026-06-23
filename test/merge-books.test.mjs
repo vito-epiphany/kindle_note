@@ -61,3 +61,52 @@ test('mergeBooks preserves user extension fields on repeated import', () => {
   assert.equal(note.extension, 'My own expansion.');
   assert.equal(note.updatedAt, '2026-01-02T00:00:00.000Z');
 });
+
+test('mergeBooks refreshes imported chapter metadata on repeated import', () => {
+  const existing = [{
+    id: 'book-deep-work-cal-newport',
+    title: 'Deep Work',
+    author: 'Cal Newport',
+    source: 'kindle',
+    firstImportedAt: '2026-01-01T00:00:00.000Z',
+    lastImportedAt: '2026-01-01T00:00:00.000Z',
+    notes: [{
+      id: 'note-1',
+      quote: 'Focus.',
+      location: 'Location 1',
+      page: '',
+      chapter: '',
+      highlightedAt: '',
+      tags: [],
+      status: 'new',
+      note: 'Edited markdown note.',
+      extension: '',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z'
+    }]
+  }];
+
+  const incoming = [{
+    id: 'book-deep-work-cal-newport',
+    title: 'Deep Work',
+    author: 'Cal Newport',
+    source: 'kindle',
+    notes: [{
+      id: 'note-1',
+      quote: 'Focus.',
+      location: 'Location 1',
+      page: '',
+      chapter: 'Focus rituals',
+      highlightedAt: '',
+      tags: [],
+      status: 'new',
+      note: 'Imported note.',
+      extension: ''
+    }]
+  }];
+
+  const result = mergeBooks(existing, incoming, { now });
+
+  assert.equal(result.books[0].notes[0].chapter, 'Focus rituals');
+  assert.equal(result.books[0].notes[0].note, 'Edited markdown note.');
+});

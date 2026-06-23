@@ -35,10 +35,12 @@ test('parses Chinese Kindle Notebook HTML exports', async () => {
   assert.equal(result.books[0].notes.length, 2);
   assert.equal(result.books[0].notes[0].quote, '');
   assert.equal(result.books[0].notes[0].note, '大宗商品代表信心，信心又代表什么呢');
+  assert.equal(result.books[0].notes[0].chapter, '第二章 救老员工，还是大学生？');
   assert.equal(result.books[0].notes[0].page, '第 8 页');
   assert.equal(result.books[0].notes[0].location, '位置 87');
   assert.equal(result.books[0].notes[1].quote, '在经历了接近一年半的横盘之后，日本土地价格终于支撑不住。');
   assert.equal(result.books[0].notes[1].note, '可以看看现在房价和企业利润的关系');
+  assert.equal(result.books[0].notes[1].chapter, '第二章 救老员工，还是大学生？');
   assert.equal(result.books[0].notes[1].page, '第 24 页');
   assert.equal(result.books[0].notes[1].location, '位置 314');
 });

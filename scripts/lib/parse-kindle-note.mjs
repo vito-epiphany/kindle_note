@@ -103,10 +103,21 @@ export function parseKindleSource(raw, { path = 'unknown' } = {}) {
   };
 
   let lastHighlightNote = null;
+  let currentChapter = '';
 
-  for (let index = firstMarkerIndex; index < lines.length; index += 1) {
+  for (let index = 0; index < lines.length; index += 1) {
     const marker = parseMarker(lines[index]);
-    if (!marker) continue;
+    if (!marker) {
+      const nextLineIsMarker = Boolean(parseMarker(lines[index + 1] || ''));
+      const isBookHeader = index < firstMarkerIndex && (lines[index] === title || lines[index] === author || lines[index] === '笔记本导出');
+
+      if (nextLineIsMarker && !isBookHeader) {
+        currentChapter = lines[index];
+      }
+
+      continue;
+    }
+
     if (marker.kind === 'bookmark') {
       lastHighlightNote = null;
       continue;
@@ -122,6 +133,7 @@ export function parseKindleSource(raw, { path = 'unknown' } = {}) {
     if (marker.kind === 'note' && lastHighlightNote) {
       lastHighlightNote.note = text;
       lastHighlightNote = null;
+      index += 1;
       continue;
     }
 
@@ -134,6 +146,7 @@ export function parseKindleSource(raw, { path = 'unknown' } = {}) {
       note,
       location: marker.location,
       page: marker.page,
+      chapter: currentChapter,
       highlightedAt: '',
       tags: [],
       status: 'new',
@@ -142,6 +155,7 @@ export function parseKindleSource(raw, { path = 'unknown' } = {}) {
 
     book.notes.push(parsedNote);
     lastHighlightNote = marker.kind === 'highlight' ? parsedNote : null;
+    index += 1;
   }
 
   if (book.notes.length === 0) {

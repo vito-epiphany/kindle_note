@@ -7,7 +7,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { renderBookPage, renderIndexPage } from '../scripts/lib/render-html.mjs';
-import { APP_JS } from '../scripts/lib/site-assets.mjs';
+import { APP_CSS, APP_JS } from '../scripts/lib/site-assets.mjs';
 
 const execFileAsync = promisify(execFile);
 const buildScriptPath = fileURLToPath(new URL('../scripts/build-html.mjs', import.meta.url));
@@ -29,6 +29,7 @@ const books = [{
     status: 'expanded',
     note: 'Connect this to planning blocks.',
     extension: '',
+    chapter: 'Focus rituals',
     createdAt: '2026-06-23T00:00:00.000Z',
     updatedAt: '2026-06-23T00:00:00.000Z'
   }]
@@ -51,15 +52,30 @@ test('renderBookPage escapes content and renders editable note fields', () => {
   assert.doesNotMatch(renderBookPage({ ...books[0], title: '<script>' }), /<script>/);
   assert.match(html, /data-note-id="note-1"/);
   assert.match(html, /data-note-source="Connect this to planning blocks\."/);
+  assert.match(html, /class="reader-shell"/);
+  assert.match(html, /class="library-pane"/);
+  assert.match(html, /class="note-list-pane"/);
+  assert.match(html, /class="detail-pane"/);
+  assert.match(html, /data-chapter="Focus rituals"/);
+  assert.match(html, /Focus rituals/);
   assert.match(html, /class="quote-block"/);
-  assert.match(html, /class="note-preview"/);
-  assert.match(html, /class="note-editor"/);
-  assert.match(html, /data-action="edit-note"/);
-  assert.match(html, /data-action="apply-note"/);
-  assert.match(html, /data-action="cancel-note"/);
+  assert.match(html, /class="note-input"/);
+  assert.doesNotMatch(html, /class="note-preview"/);
+  assert.doesNotMatch(html, /class="note-editor"/);
+  assert.doesNotMatch(html, /data-action="edit-note"/);
+  assert.doesNotMatch(html, /data-action="apply-note"/);
+  assert.doesNotMatch(html, /data-action="cancel-note"/);
   assert.doesNotMatch(html, /extension-preview/);
   assert.match(html, /id="export-json"/);
   assert.match(html, /<script type="application\/json" id="books-data">/);
+});
+
+test('book page layout fills the viewport and gives editing room', () => {
+  assert.match(APP_CSS, /\.reader-shell\s*{[^}]*grid-template-columns: 320px 430px minmax\(0, 1fr\)/s);
+  assert.match(APP_CSS, /\.reader-shell\s*{[^}]*min-height: 100vh/s);
+  assert.match(APP_CSS, /\.reader-shell\s*{[^}]*margin: 0/s);
+  assert.match(APP_CSS, /\.note-input\s*{[^}]*min-height: 320px/s);
+  assert.doesNotMatch(APP_CSS, /\.note-preview/);
 });
 
 test('build-html removes stale book pages that are no longer in books.json', async () => {
@@ -102,11 +118,13 @@ test('build-html rebuilds referenced app assets from data/books.json', async () 
 });
 
 test('app asset includes markdown note editing and export behavior', () => {
-  assert.match(APP_JS, /function renderMarkdown/);
-  assert.match(APP_JS, /escapeHtml/);
-  assert.match(APP_JS, /edit-note/);
-  assert.match(APP_JS, /apply-note/);
-  assert.match(APP_JS, /cancel-note/);
+  assert.match(APP_JS, /addEventListener\('input'/);
+  assert.match(APP_JS, /editedNotes\.set/);
+  assert.doesNotMatch(APP_JS, /function renderMarkdown/);
+  assert.doesNotMatch(APP_JS, /escapeHtml/);
+  assert.doesNotMatch(APP_JS, /edit-note/);
+  assert.doesNotMatch(APP_JS, /apply-note/);
+  assert.doesNotMatch(APP_JS, /cancel-note/);
   assert.match(APP_JS, /export-json/);
   assert.match(APP_JS, /new Blob/);
   assert.doesNotMatch(APP_JS, /editedExtensions/);

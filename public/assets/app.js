@@ -1,54 +1,60 @@
-function escapeHtml(value) {
-  return String(value ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function renderInlineMarkdown(value) {
-  return escapeHtml(value)
-    .replace(/\`([^\`]+)\`/g, '<code>$1</code>')
-    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
-}
-
-function renderMarkdown(source) {
-  const text = String(source ?? '').trim();
-  if (!text) return '<p class="empty-note">暂无笔记</p>';
-
-  return text.split(/\n{2,}/).map((block) => {
-    if (/^\`\`\`/.test(block)) {
-      const code = block.replace(/^\`\`\`[a-zA-Z0-9_-]*\n?|\n?\`\`\`$/g, '');
-      return '<pre><code>' + escapeHtml(code) + '</code></pre>';
-    }
-
-    if (/^#{1,3}\s+/.test(block)) {
-      const level = block.match(/^#{1,3}/)[0].length;
-      return '<h' + level + '>' + renderInlineMarkdown(block.replace(/^#{1,3}\s+/, '')) + '</h' + level + '>';
-    }
-
-    if (/^>\s?/m.test(block)) {
-      return '<blockquote>' + renderInlineMarkdown(block.replace(/^>\s?/gm, '')) + '</blockquote>';
-    }
-
-    if (/^[-*]\s+/m.test(block)) {
-      return '<ul>' + block.split('\n').map((line) => '<li>' + renderInlineMarkdown(line.replace(/^[-*]\s+/, '')) + '</li>').join('') + '</ul>';
-    }
-
-    if (/^\d+\.\s+/m.test(block)) {
-      return '<ol>' + block.split('\n').map((line) => '<li>' + renderInlineMarkdown(line.replace(/^\d+\.\s+/, '')) + '</li>').join('') + '</ol>';
-    }
-
-    return '<p>' + renderInlineMarkdown(block).replace(/\n/g, '<br>') + '</p>';
-  }).join('');
-}
-
 const search = document.querySelector('#search');
+const chapterButtons = [...document.querySelectorAll('[data-chapter-filter]')];
+const noteListItems = [...document.querySelectorAll('[data-note-target]')];
+const detailCards = [...document.querySelectorAll('.detail-card[data-note-id]')];
+let activeChapter = chapterButtons.find((button) => button.getAttribute('aria-current') === 'true')?.dataset.chapterFilter || chapterButtons[0]?.dataset.chapterFilter || '';
+let activeSearchQuery = '';
 
-if (search) {
+function selectNote(noteId) {
+  if (!noteId) return;
+
+  for (const item of noteListItems) {
+    item.setAttribute('aria-current', item.dataset.noteTarget === noteId ? 'true' : 'false');
+  }
+
+  for (const card of detailCards) {
+    card.hidden = card.dataset.noteId !== noteId;
+  }
+}
+
+function applyNoteFilters() {
+  for (const item of noteListItems) {
+    const matchesChapter = !activeChapter || item.dataset.chapter === activeChapter;
+    const matchesSearch = !activeSearchQuery || item.dataset.search.includes(activeSearchQuery);
+    item.hidden = !(matchesChapter && matchesSearch);
+  }
+
+  const currentItem = noteListItems.find((item) => item.getAttribute('aria-current') === 'true' && !item.hidden);
+  const nextItem = currentItem || noteListItems.find((item) => !item.hidden);
+  selectNote(nextItem?.dataset.noteTarget || '');
+}
+
+if (noteListItems.length > 0) {
+  for (const item of noteListItems) {
+    item.addEventListener('click', () => selectNote(item.dataset.noteTarget));
+  }
+
+  for (const button of chapterButtons) {
+    button.addEventListener('click', () => {
+      activeChapter = button.dataset.chapterFilter || '';
+
+      for (const item of chapterButtons) {
+        item.setAttribute('aria-current', item === button ? 'true' : 'false');
+      }
+
+      applyNoteFilters();
+    });
+  }
+
+  if (search) {
+    search.addEventListener('input', () => {
+      activeSearchQuery = search.value.trim().toLowerCase();
+      applyNoteFilters();
+    });
+  }
+
+  applyNoteFilters();
+} else if (search) {
   const searchableItems = [...document.querySelectorAll('[data-search]')];
 
   search.addEventListener('input', () => {
@@ -66,36 +72,13 @@ const booksData = booksDataScript ? JSON.parse(booksDataScript.textContent) : nu
 const editedNotes = new Map();
 
 for (const note of document.querySelectorAll('[data-note-id]')) {
-  const preview = note.querySelector('[data-note-preview]');
-  const editor = note.querySelector('[data-note-editor]');
   const input = note.querySelector('[data-note-input]');
-  const edit = note.querySelector('[data-action="edit-note"]');
-  const apply = note.querySelector('[data-action="apply-note"]');
-  const cancel = note.querySelector('[data-action="cancel-note"]');
+  if (!input) continue;
 
-  if (!preview || !editor || !input || !edit || !apply || !cancel) continue;
-
-  preview.innerHTML = renderMarkdown(note.dataset.noteSource || '');
-
-  edit.addEventListener('click', () => {
-    input.value = note.dataset.noteSource || '';
-    editor.hidden = false;
-    edit.hidden = true;
-  });
-
-  apply.addEventListener('click', () => {
+  input.addEventListener('input', () => {
     note.dataset.noteSource = input.value;
-    preview.innerHTML = renderMarkdown(input.value);
     editedNotes.set(note.dataset.noteId, input.value);
-    editor.hidden = true;
-    edit.hidden = false;
     if (exportButton) exportButton.disabled = false;
-  });
-
-  cancel.addEventListener('click', () => {
-    input.value = note.dataset.noteSource || '';
-    editor.hidden = true;
-    edit.hidden = false;
   });
 }
 

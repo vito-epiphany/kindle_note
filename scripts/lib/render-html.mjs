@@ -75,10 +75,50 @@ export function renderIndexPage(books) {
 }
 
 export function renderBookPage(book, allBooks = [book]) {
-  const notes = normalizeList(book.notes).map((note) => {
+  const bookNotes = normalizeList(book.notes);
+  const normalizedBooks = normalizeList(allBooks);
+  const chapters = [...new Set(bookNotes.map((note) => note.chapter || '未分章'))];
+  const activeChapter = chapters[0] || '未分章';
+  const firstNoteId = bookNotes[0]?.id || '';
+
+  const bookItems = normalizedBooks.map((item) => {
+    const isActive = item.id === book.id;
+    return `<a class="library-book" href="${escapeAttribute(`${item.id}.html`)}" aria-current="${isActive ? 'page' : 'false'}">
+        <span>${escapeHtml(item.title)}</span>
+        <small>${escapeHtml(item.author || 'Unknown author')}</small>
+      </a>`;
+  }).join('\n');
+
+  const chapterItems = chapters.map((chapter) => {
+    const count = bookNotes.filter((note) => (note.chapter || '未分章') === chapter).length;
+    const isActive = chapter === activeChapter;
+    return `<button type="button" class="chapter-link" data-chapter-filter="${escapeAttribute(chapter)}" aria-current="${isActive ? 'true' : 'false'}">
+        <span>${escapeHtml(chapter)}</span>
+        <small>${count}</small>
+      </button>`;
+  }).join('\n');
+
+  const noteList = bookNotes.map((note) => {
     const tags = normalizeList(note.tags);
-    const meta = [note.location, note.page, note.highlightedAt].filter(Boolean).join(' · ');
-    const searchable = `${note.quote || ''} ${note.note || ''} ${tags.join(' ')}`.toLowerCase();
+    const chapter = note.chapter || '未分章';
+    const meta = [chapter, note.location, note.page].filter(Boolean).join(' · ');
+    const sourceText = note.quote || note.note || '空白笔记';
+    const searchable = `${note.quote || ''} ${note.note || ''} ${chapter} ${tags.join(' ')}`.toLowerCase();
+    const title = note.quote ? '原文标注' : '读书笔记';
+    const isActive = note.id === firstNoteId;
+
+    return `<button type="button" class="note-list-item" data-note-target="${escapeAttribute(note.id)}" data-chapter="${escapeAttribute(chapter)}" data-search="${escapeAttribute(searchable)}" aria-current="${isActive ? 'true' : 'false'}">
+        <strong>${escapeHtml(title)}</strong>
+        <span>${escapeHtml(sourceText)}</span>
+        <small>${escapeHtml(meta || 'No location')}</small>
+      </button>`;
+  }).join('\n');
+
+  const notes = bookNotes.map((note) => {
+    const tags = normalizeList(note.tags);
+    const chapter = note.chapter || '未分章';
+    const meta = [chapter, note.location, note.page, note.highlightedAt].filter(Boolean).join(' · ');
+    const searchable = `${note.quote || ''} ${note.note || ''} ${chapter} ${tags.join(' ')}`.toLowerCase();
     const renderedTags = tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('');
     const noteText = note.note || '';
     const quoteBlock = note.quote
@@ -87,38 +127,58 @@ export function renderBookPage(book, allBooks = [book]) {
         <blockquote>${escapeHtml(note.quote)}</blockquote>
       </section>`
       : '';
+    const isActive = note.id === firstNoteId;
 
-    return `<article class="note" data-note-id="${escapeAttribute(note.id)}" data-note-source="${escapeAttribute(noteText)}" data-search="${escapeHtml(searchable)}">
-      ${quoteBlock}
+    return `<article class="note detail-card" data-note-id="${escapeAttribute(note.id)}" data-chapter="${escapeAttribute(chapter)}" data-note-source="${escapeAttribute(noteText)}" data-search="${escapeAttribute(searchable)}"${isActive ? '' : ' hidden'}>
+      <header class="detail-header">
+        <div>
+          <p class="eyebrow">${escapeHtml(chapter)}</p>
+          <h1>${note.quote ? '原文标注' : '读书笔记'}</h1>
+        </div>
+        <p class="status">${escapeHtml(note.status || 'new')}</p>
+      </header>
       <p class="meta">${escapeHtml(meta || 'No location')}</p>
-      <p class="status">${escapeHtml(note.status || 'new')}</p>
       <div class="tags">${renderedTags}</div>
+      ${quoteBlock}
       <section class="note-markdown">
         <h2>笔记</h2>
-        <div class="note-preview" data-note-preview>${escapeHtml(noteText || '暂无笔记')}</div>
-        <div class="note-editor" data-note-editor hidden>
-          <textarea data-note-input aria-label="Markdown note">${escapeHtml(noteText)}</textarea>
-          <div class="note-actions">
-            <button type="button" data-action="apply-note">Apply</button>
-            <button type="button" data-action="cancel-note">Cancel</button>
-          </div>
-        </div>
-        <button type="button" data-action="edit-note">Edit</button>
+        <textarea class="note-input" data-note-input aria-label="Markdown note">${escapeHtml(noteText)}</textarea>
       </section>
     </article>`;
   }).join('\n');
 
   return pageShell({
     title: `${book.title} - Kindle Notes`,
-    body: `  <main class="page">
-    <nav><a href="../index.html">Back to all books</a></nav>
-    <header class="hero">
-      <h1>${escapeHtml(book.title)}</h1>
-      <p>${escapeHtml(book.author || 'Unknown author')}</p>
-      <input id="search" type="search" placeholder="Filter notes" aria-label="Filter notes">
-    </header>
-    <button type="button" id="export-json" disabled>Export books.json</button>
-    <section class="notes">${notes}</section>
+    body: `  <main class="reader-shell">
+    <aside class="library-pane">
+      <div class="window-controls" aria-hidden="true"><span></span><span></span><span></span></div>
+      <a class="back-link" href="../index.html">全部图书</a>
+      <section class="library-section">
+        <h2>图书</h2>
+        <div class="library-books">${bookItems}</div>
+      </section>
+      <section class="library-section">
+        <h2>章节</h2>
+        <div class="chapter-list">${chapterItems}</div>
+      </section>
+    </aside>
+    <aside class="note-list-pane">
+      <header class="list-header">
+        <div>
+          <p class="eyebrow">笔记</p>
+          <h1>${escapeHtml(book.title)}</h1>
+          <p>${escapeHtml(book.author || 'Unknown author')}</p>
+        </div>
+        <input id="search" type="search" placeholder="搜索笔记" aria-label="Filter notes">
+      </header>
+      <section class="note-list">${noteList}</section>
+    </aside>
+    <section class="detail-pane">
+      <div class="detail-toolbar">
+        <button type="button" id="export-json" disabled>Export books.json</button>
+      </div>
+      <section class="notes">${notes}</section>
+    </section>
     <script type="application/json" id="books-data">${escapeScriptJson(allBooks)}</script>
   </main>`,
     assetPrefix: '../'
