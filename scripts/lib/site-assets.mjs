@@ -128,10 +128,29 @@ textarea:focus {
   gap: 10px;
 }
 
-.library-section h2 {
+.section-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 30px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
   color: var(--rail-muted);
   font-size: 13px;
   font-weight: 700;
+  letter-spacing: 0;
+  padding: 0 4px;
+  text-align: left;
+}
+
+.section-toggle[aria-expanded="false"] span:last-child {
+  transform: rotate(-90deg);
+}
+
+.section-toggle span:last-child {
+  transition: transform 120ms ease;
 }
 
 .library-books,
@@ -168,10 +187,29 @@ textarea:focus {
   white-space: nowrap;
 }
 
-.library-book small,
+.library-book span {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.library-book small {
+  color: inherit;
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0.72;
+}
+
+.chapter-link span {
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
 .chapter-link small {
   color: inherit;
   font-size: 12px;
+  line-height: 1.35;
   opacity: 0.75;
 }
 
@@ -415,6 +453,7 @@ export const APP_JS = `const search = document.querySelector('#search');
 const chapterButtons = [...document.querySelectorAll('[data-chapter-filter]')];
 const noteListItems = [...document.querySelectorAll('[data-note-target]')];
 const detailCards = [...document.querySelectorAll('.detail-card[data-note-id]')];
+const collapseButtons = [...document.querySelectorAll('[data-collapse-target]')];
 let activeChapter = chapterButtons.find((button) => button.getAttribute('aria-current') === 'true')?.dataset.chapterFilter || chapterButtons[0]?.dataset.chapterFilter || '';
 let activeSearchQuery = '';
 
@@ -476,6 +515,17 @@ if (noteListItems.length > 0) {
     for (const item of searchableItems) {
       item.hidden = query.length > 0 && !item.dataset.search.includes(query);
     }
+  });
+}
+
+for (const button of collapseButtons) {
+  const panel = document.querySelector('[data-collapse-panel="' + button.dataset.collapseTarget + '"]');
+  if (!panel) continue;
+
+  button.addEventListener('click', () => {
+    const willExpand = button.getAttribute('aria-expanded') !== 'true';
+    button.setAttribute('aria-expanded', willExpand ? 'true' : 'false');
+    panel.hidden = !willExpand;
   });
 }
 

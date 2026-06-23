@@ -2,6 +2,7 @@ const search = document.querySelector('#search');
 const chapterButtons = [...document.querySelectorAll('[data-chapter-filter]')];
 const noteListItems = [...document.querySelectorAll('[data-note-target]')];
 const detailCards = [...document.querySelectorAll('.detail-card[data-note-id]')];
+const collapseButtons = [...document.querySelectorAll('[data-collapse-target]')];
 let activeChapter = chapterButtons.find((button) => button.getAttribute('aria-current') === 'true')?.dataset.chapterFilter || chapterButtons[0]?.dataset.chapterFilter || '';
 let activeSearchQuery = '';
 
@@ -63,6 +64,17 @@ if (noteListItems.length > 0) {
     for (const item of searchableItems) {
       item.hidden = query.length > 0 && !item.dataset.search.includes(query);
     }
+  });
+}
+
+for (const button of collapseButtons) {
+  const panel = document.querySelector('[data-collapse-panel="' + button.dataset.collapseTarget + '"]');
+  if (!panel) continue;
+
+  button.addEventListener('click', () => {
+    const willExpand = button.getAttribute('aria-expanded') !== 'true';
+    button.setAttribute('aria-expanded', willExpand ? 'true' : 'false');
+    panel.hidden = !willExpand;
   });
 }
 

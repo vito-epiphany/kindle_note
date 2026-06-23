@@ -11,8 +11,11 @@
     <aside class="library-pane">
       <a class="back-link" href="../index.html">全部图书</a>
       <section class="library-section">
-        <h2>图书</h2>
-        <div class="library-books"><a class="library-book" href="book-deep-work-cal-newport.html" aria-current="page">
+        <button type="button" class="section-toggle" data-collapse-target="books" aria-expanded="true">
+          <span>图书</span>
+          <span aria-hidden="true">⌄</span>
+        </button>
+        <div class="library-books" data-collapse-panel="books"><a class="library-book" href="book-deep-work-cal-newport.html" aria-current="page">
         <span>Deep Work</span>
         <small>Cal Newport</small>
       </a>
@@ -22,8 +25,11 @@
       </a></div>
       </section>
       <section class="library-section">
-        <h2>章节</h2>
-        <div class="chapter-list"><button type="button" class="chapter-link" data-chapter-filter="未分章" aria-current="true">
+        <button type="button" class="section-toggle" data-collapse-target="chapters" aria-expanded="true">
+          <span>章节</span>
+          <span aria-hidden="true">⌄</span>
+        </button>
+        <div class="chapter-list" data-collapse-panel="chapters"><button type="button" class="chapter-link" data-chapter-filter="未分章" aria-current="true">
         <span>未分章</span>
         <small>3</small>
       </button></div>

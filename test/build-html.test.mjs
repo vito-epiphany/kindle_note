@@ -56,6 +56,10 @@ test('renderBookPage escapes content and renders editable note fields', () => {
   assert.match(html, /class="library-pane"/);
   assert.match(html, /class="note-list-pane"/);
   assert.match(html, /class="detail-pane"/);
+  assert.match(html, /data-collapse-target="books"/);
+  assert.match(html, /data-collapse-target="chapters"/);
+  assert.match(html, /data-collapse-panel="books"/);
+  assert.match(html, /data-collapse-panel="chapters"/);
   assert.match(html, /data-chapter="Focus rituals"/);
   assert.match(html, /Focus rituals/);
   assert.match(html, /class="quote-block"/);
@@ -81,6 +85,17 @@ test('book page layout fills the viewport without decorative frames', () => {
   assert.doesNotMatch(APP_CSS, /\.window-controls/);
   assert.doesNotMatch(APP_CSS, /\.detail-toolbar/);
   assert.doesNotMatch(APP_CSS, /\.note-preview/);
+});
+
+test('sidebar sections are collapsible and typographic hierarchy is explicit', () => {
+  assert.match(APP_CSS, /\.section-toggle\s*{[^}]*font-size: 13px/s);
+  assert.match(APP_CSS, /\.library-book span\s*{[^}]*font-size: 17px/s);
+  assert.match(APP_CSS, /\.library-book small\s*{[^}]*font-size: 13px/s);
+  assert.match(APP_CSS, /\.chapter-link span\s*{[^}]*font-size: 15px/s);
+  assert.match(APP_CSS, /\.chapter-link small\s*{[^}]*font-size: 12px/s);
+  assert.match(APP_JS, /data-collapse-target/);
+  assert.match(APP_JS, /aria-expanded/);
+  assert.match(APP_JS, /data-collapse-panel/);
 });
 
 test('build-html removes stale book pages that are no longer in books.json', async () => {

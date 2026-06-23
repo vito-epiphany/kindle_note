@@ -153,12 +153,18 @@ export function renderBookPage(book, allBooks = [book]) {
     <aside class="library-pane">
       <a class="back-link" href="../index.html">全部图书</a>
       <section class="library-section">
-        <h2>图书</h2>
-        <div class="library-books">${bookItems}</div>
+        <button type="button" class="section-toggle" data-collapse-target="books" aria-expanded="true">
+          <span>图书</span>
+          <span aria-hidden="true">⌄</span>
+        </button>
+        <div class="library-books" data-collapse-panel="books">${bookItems}</div>
       </section>
       <section class="library-section">
-        <h2>章节</h2>
-        <div class="chapter-list">${chapterItems}</div>
+        <button type="button" class="section-toggle" data-collapse-target="chapters" aria-expanded="true">
+          <span>章节</span>
+          <span aria-hidden="true">⌄</span>
+        </button>
+        <div class="chapter-list" data-collapse-panel="chapters">${chapterItems}</div>
       </section>
     </aside>
     <aside class="note-list-pane">
