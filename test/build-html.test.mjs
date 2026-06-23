@@ -60,21 +60,26 @@ test('renderBookPage escapes content and renders editable note fields', () => {
   assert.match(html, /Focus rituals/);
   assert.match(html, /class="quote-block"/);
   assert.match(html, /class="note-input"/);
+  assert.doesNotMatch(html, /window-controls/);
+  assert.doesNotMatch(html, /detail-toolbar/);
   assert.doesNotMatch(html, /class="note-preview"/);
   assert.doesNotMatch(html, /class="note-editor"/);
   assert.doesNotMatch(html, /data-action="edit-note"/);
   assert.doesNotMatch(html, /data-action="apply-note"/);
   assert.doesNotMatch(html, /data-action="cancel-note"/);
   assert.doesNotMatch(html, /extension-preview/);
-  assert.match(html, /id="export-json"/);
+  assert.doesNotMatch(html, /id="export-json"/);
   assert.match(html, /<script type="application\/json" id="books-data">/);
 });
 
-test('book page layout fills the viewport and gives editing room', () => {
+test('book page layout fills the viewport without decorative frames', () => {
   assert.match(APP_CSS, /\.reader-shell\s*{[^}]*grid-template-columns: 320px 430px minmax\(0, 1fr\)/s);
   assert.match(APP_CSS, /\.reader-shell\s*{[^}]*min-height: 100vh/s);
   assert.match(APP_CSS, /\.reader-shell\s*{[^}]*margin: 0/s);
   assert.match(APP_CSS, /\.note-input\s*{[^}]*min-height: 320px/s);
+  assert.match(APP_CSS, /\.note-input\s*{[^}]*border: 0/s);
+  assert.doesNotMatch(APP_CSS, /\.window-controls/);
+  assert.doesNotMatch(APP_CSS, /\.detail-toolbar/);
   assert.doesNotMatch(APP_CSS, /\.note-preview/);
 });
 
@@ -120,12 +125,14 @@ test('build-html rebuilds referenced app assets from data/books.json', async () 
 test('app asset includes markdown note editing and export behavior', () => {
   assert.match(APP_JS, /addEventListener\('input'/);
   assert.match(APP_JS, /editedNotes\.set/);
+  assert.match(APP_JS, /localStorage\.getItem/);
+  assert.match(APP_JS, /localStorage\.setItem/);
   assert.doesNotMatch(APP_JS, /function renderMarkdown/);
   assert.doesNotMatch(APP_JS, /escapeHtml/);
   assert.doesNotMatch(APP_JS, /edit-note/);
   assert.doesNotMatch(APP_JS, /apply-note/);
   assert.doesNotMatch(APP_JS, /cancel-note/);
-  assert.match(APP_JS, /export-json/);
-  assert.match(APP_JS, /new Blob/);
+  assert.doesNotMatch(APP_JS, /export-json/);
+  assert.doesNotMatch(APP_JS, /new Blob/);
   assert.doesNotMatch(APP_JS, /editedExtensions/);
 });

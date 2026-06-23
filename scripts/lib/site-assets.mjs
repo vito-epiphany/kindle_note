@@ -113,28 +113,7 @@ textarea:focus {
   overflow: auto;
   background: var(--rail);
   color: var(--rail-text);
-  padding: 24px 22px;
-}
-
-.window-controls {
-  display: flex;
-  gap: 8px;
-  margin: 4px 0 10px;
-}
-
-.window-controls span {
-  width: 12px;
-  height: 12px;
-  border-radius: 999px;
-  background: #ff5f57;
-}
-
-.window-controls span:nth-child(2) {
-  background: #febc2e;
-}
-
-.window-controls span:nth-child(3) {
-  background: #28c840;
+  padding: 34px 22px 24px;
 }
 
 .back-link {
@@ -280,13 +259,7 @@ textarea:focus {
   min-width: 0;
   overflow: auto;
   background: var(--panel);
-  padding: 34px min(6vw, 88px) 56px;
-}
-
-.detail-toolbar {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 32px;
+  padding: 74px min(6vw, 88px) 56px;
 }
 
 .detail-card {
@@ -352,14 +325,18 @@ blockquote {
   width: 100%;
   min-height: 320px;
   resize: vertical;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fbfbfa;
-  padding: 16px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
   color: #454545;
   font: inherit;
   font-size: 17px;
   line-height: 1.7;
+}
+
+.note-input:focus {
+  outline-offset: 6px;
 }
 
 .note-actions {
@@ -502,42 +479,33 @@ if (noteListItems.length > 0) {
   });
 }
 
-const booksDataScript = document.querySelector('#books-data');
-const exportButton = document.querySelector('#export-json');
-const booksData = booksDataScript ? JSON.parse(booksDataScript.textContent) : null;
 const editedNotes = new Map();
+
+function noteStorageKey(noteId) {
+  return 'kindle-note:' + noteId + ':note';
+}
 
 for (const note of document.querySelectorAll('[data-note-id]')) {
   const input = note.querySelector('[data-note-input]');
   if (!input) continue;
 
+  try {
+    const savedNote = localStorage.getItem(noteStorageKey(note.dataset.noteId));
+    if (savedNote !== null) {
+      input.value = savedNote;
+      note.dataset.noteSource = savedNote;
+    }
+  } catch {
+    // Local files can run in browser modes where storage is unavailable.
+  }
+
   input.addEventListener('input', () => {
     note.dataset.noteSource = input.value;
     editedNotes.set(note.dataset.noteId, input.value);
-    if (exportButton) exportButton.disabled = false;
-  });
-}
-
-if (exportButton && booksData) {
-  exportButton.addEventListener('click', () => {
     try {
-      for (const book of booksData) {
-        for (const note of book.notes || []) {
-          if (editedNotes.has(note.id)) {
-            note.note = editedNotes.get(note.id);
-            note.updatedAt = new Date().toISOString();
-          }
-        }
-      }
-
-      const blob = new Blob([JSON.stringify(booksData, null, 2) + '\\n'], { type: 'application/json' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'books.json';
-      link.click();
-      URL.revokeObjectURL(link.href);
-    } catch (error) {
-      alert('Export failed: ' + error.message);
+      localStorage.setItem(noteStorageKey(note.dataset.noteId), input.value);
+    } catch {
+      // Editing still works for the current page even without persisted storage.
     }
   });
 }

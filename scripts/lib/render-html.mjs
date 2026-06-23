@@ -151,7 +151,6 @@ export function renderBookPage(book, allBooks = [book]) {
     title: `${book.title} - Kindle Notes`,
     body: `  <main class="reader-shell">
     <aside class="library-pane">
-      <div class="window-controls" aria-hidden="true"><span></span><span></span><span></span></div>
       <a class="back-link" href="../index.html">全部图书</a>
       <section class="library-section">
         <h2>图书</h2>
@@ -174,9 +173,6 @@ export function renderBookPage(book, allBooks = [book]) {
       <section class="note-list">${noteList}</section>
     </aside>
     <section class="detail-pane">
-      <div class="detail-toolbar">
-        <button type="button" id="export-json" disabled>Export books.json</button>
-      </div>
       <section class="notes">${notes}</section>
     </section>
     <script type="application/json" id="books-data">${escapeScriptJson(allBooks)}</script>

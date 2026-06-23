@@ -66,42 +66,33 @@ if (noteListItems.length > 0) {
   });
 }
 
-const booksDataScript = document.querySelector('#books-data');
-const exportButton = document.querySelector('#export-json');
-const booksData = booksDataScript ? JSON.parse(booksDataScript.textContent) : null;
 const editedNotes = new Map();
+
+function noteStorageKey(noteId) {
+  return 'kindle-note:' + noteId + ':note';
+}
 
 for (const note of document.querySelectorAll('[data-note-id]')) {
   const input = note.querySelector('[data-note-input]');
   if (!input) continue;
 
+  try {
+    const savedNote = localStorage.getItem(noteStorageKey(note.dataset.noteId));
+    if (savedNote !== null) {
+      input.value = savedNote;
+      note.dataset.noteSource = savedNote;
+    }
+  } catch {
+    // Local files can run in browser modes where storage is unavailable.
+  }
+
   input.addEventListener('input', () => {
     note.dataset.noteSource = input.value;
     editedNotes.set(note.dataset.noteId, input.value);
-    if (exportButton) exportButton.disabled = false;
-  });
-}
-
-if (exportButton && booksData) {
-  exportButton.addEventListener('click', () => {
     try {
-      for (const book of booksData) {
-        for (const note of book.notes || []) {
-          if (editedNotes.has(note.id)) {
-            note.note = editedNotes.get(note.id);
-            note.updatedAt = new Date().toISOString();
-          }
-        }
-      }
-
-      const blob = new Blob([JSON.stringify(booksData, null, 2) + '\n'], { type: 'application/json' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'books.json';
-      link.click();
-      URL.revokeObjectURL(link.href);
-    } catch (error) {
-      alert('Export failed: ' + error.message);
+      localStorage.setItem(noteStorageKey(note.dataset.noteId), input.value);
+    } catch {
+      // Editing still works for the current page even without persisted storage.
     }
   });
 }
