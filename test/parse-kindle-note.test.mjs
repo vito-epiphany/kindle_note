@@ -24,6 +24,21 @@ test('parses simple HTML and EML bodies', async () => {
   assert.equal(parseKindleSource(eml, { path: 'sample.eml' }).books[0].notes.length, 1);
 });
 
+test('parses Chinese Kindle Notebook HTML exports', async () => {
+  const raw = await readFile('test/fixtures/kindle-notebook-cn.html', 'utf8');
+  const result = parseKindleSource(raw, { path: 'kindle-notebook-cn.html' });
+
+  assert.equal(result.warnings.length, 0);
+  assert.equal(result.books.length, 1);
+  assert.equal(result.books[0].title, '以日为鉴 衰退时代生存指南');
+  assert.equal(result.books[0].author, '分析师Boden');
+  assert.equal(result.books[0].notes.length, 2);
+  assert.equal(result.books[0].notes[0].quote, '在经历了接近一年半的横盘之后，日本土地价格终于支撑不住。');
+  assert.equal(result.books[0].notes[0].page, '第 24 页');
+  assert.equal(result.books[0].notes[0].location, '位置 314');
+  assert.equal(result.books[0].notes[1].quote, '可以看看现在房价和企业利润的关系');
+});
+
 test('reports unsupported input without throwing', async () => {
   const raw = await readFile('test/fixtures/unsupported.txt', 'utf8');
   const result = parseKindleSource(raw, { path: 'unsupported.txt' });
