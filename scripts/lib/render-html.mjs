@@ -49,7 +49,7 @@ export function renderIndexPage(books) {
   const items = normalizeList(books).map((book) => {
     const notes = normalizeList(book.notes);
     const href = `books/${book.id}.html`;
-    const searchable = `${book.title} ${book.author} ${notes.map((note) => note.quote).join(' ')}`;
+    const searchable = `${book.title} ${book.author} ${notes.map((note) => `${note.quote || ''} ${note.note || ''}`).join(' ')}`;
     const lastImportTime = formatImportTime(book.lastImportedAt);
 
     return `<article class="book-card" data-search="${escapeHtml(searchable.toLowerCase())}">
@@ -78,25 +78,32 @@ export function renderBookPage(book, allBooks = [book]) {
   const notes = normalizeList(book.notes).map((note) => {
     const tags = normalizeList(note.tags);
     const meta = [note.location, note.page, note.highlightedAt].filter(Boolean).join(' · ');
-    const searchable = `${note.quote} ${note.extension} ${tags.join(' ')}`.toLowerCase();
+    const searchable = `${note.quote || ''} ${note.note || ''} ${tags.join(' ')}`.toLowerCase();
     const renderedTags = tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('');
-    const extension = note.extension || '';
+    const noteText = note.note || '';
+    const quoteBlock = note.quote
+      ? `<section class="quote-block">
+        <h2>原文</h2>
+        <blockquote>${escapeHtml(note.quote)}</blockquote>
+      </section>`
+      : '';
 
-    return `<article class="note" data-note-id="${escapeAttribute(note.id)}" data-extension-source="${escapeAttribute(extension)}" data-search="${escapeHtml(searchable)}">
-      <blockquote>${escapeHtml(note.quote)}</blockquote>
+    return `<article class="note" data-note-id="${escapeAttribute(note.id)}" data-note-source="${escapeAttribute(noteText)}" data-search="${escapeHtml(searchable)}">
+      ${quoteBlock}
       <p class="meta">${escapeHtml(meta || 'No location')}</p>
       <p class="status">${escapeHtml(note.status || 'new')}</p>
       <div class="tags">${renderedTags}</div>
-      <section class="extension">
-        <div class="extension-preview" data-extension-preview>${escapeHtml(extension || '暂无拓展')}</div>
-        <div class="extension-editor" data-extension-editor hidden>
-          <textarea data-extension-input aria-label="Markdown extension">${escapeHtml(extension)}</textarea>
-          <div class="extension-actions">
-            <button type="button" data-action="apply-extension">Apply</button>
-            <button type="button" data-action="cancel-extension">Cancel</button>
+      <section class="note-markdown">
+        <h2>笔记</h2>
+        <div class="note-preview" data-note-preview>${escapeHtml(noteText || '暂无笔记')}</div>
+        <div class="note-editor" data-note-editor hidden>
+          <textarea data-note-input aria-label="Markdown note">${escapeHtml(noteText)}</textarea>
+          <div class="note-actions">
+            <button type="button" data-action="apply-note">Apply</button>
+            <button type="button" data-action="cancel-note">Cancel</button>
           </div>
         </div>
-        <button type="button" data-action="edit-extension">Edit</button>
+        <button type="button" data-action="edit-note">Edit</button>
       </section>
     </article>`;
   }).join('\n');

@@ -34,6 +34,7 @@ export function mergeBooks(existingBooks, incomingBooks, { now = new Date().toIS
           ...incomingNote,
           tags: existingNote.tags || [],
           status: existingNote.status || 'new',
+          note: existingNote.note ?? incomingNote.note ?? '',
           extension: existingNote.extension || '',
           createdAt: existingNote.createdAt || now,
           updatedAt: existingNote.updatedAt || existingNote.createdAt || now

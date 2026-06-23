@@ -27,7 +27,8 @@ const books = [{
     highlightedAt: '',
     tags: ['attention'],
     status: 'expanded',
-    extension: 'Connect this to planning blocks.',
+    note: 'Connect this to planning blocks.',
+    extension: '',
     createdAt: '2026-06-23T00:00:00.000Z',
     updatedAt: '2026-06-23T00:00:00.000Z'
   }]
@@ -42,19 +43,21 @@ test('renderIndexPage includes search and book links', () => {
   assert.match(html, /2026-06-23 00:00 UTC/);
 });
 
-test('renderBookPage escapes content and renders extension fields', () => {
+test('renderBookPage escapes content and renders editable note fields', () => {
   const html = renderBookPage(books[0], books);
   assert.match(html, /Focus deeply on cognitively demanding tasks\./);
   assert.match(html, /Connect this to planning blocks\./);
   assert.match(html, /attention/);
   assert.doesNotMatch(renderBookPage({ ...books[0], title: '<script>' }), /<script>/);
   assert.match(html, /data-note-id="note-1"/);
-  assert.match(html, /data-extension-source="Connect this to planning blocks\."/);
-  assert.match(html, /class="extension-preview"/);
-  assert.match(html, /class="extension-editor"/);
-  assert.match(html, /data-action="edit-extension"/);
-  assert.match(html, /data-action="apply-extension"/);
-  assert.match(html, /data-action="cancel-extension"/);
+  assert.match(html, /data-note-source="Connect this to planning blocks\."/);
+  assert.match(html, /class="quote-block"/);
+  assert.match(html, /class="note-preview"/);
+  assert.match(html, /class="note-editor"/);
+  assert.match(html, /data-action="edit-note"/);
+  assert.match(html, /data-action="apply-note"/);
+  assert.match(html, /data-action="cancel-note"/);
+  assert.doesNotMatch(html, /extension-preview/);
   assert.match(html, /id="export-json"/);
   assert.match(html, /<script type="application\/json" id="books-data">/);
 });
@@ -98,12 +101,13 @@ test('build-html rebuilds referenced app assets from data/books.json', async () 
   assert.match(stdout, /Built 1 book page\(s\)\./);
 });
 
-test('app asset includes markdown editing and export behavior', () => {
+test('app asset includes markdown note editing and export behavior', () => {
   assert.match(APP_JS, /function renderMarkdown/);
   assert.match(APP_JS, /escapeHtml/);
-  assert.match(APP_JS, /edit-extension/);
-  assert.match(APP_JS, /apply-extension/);
-  assert.match(APP_JS, /cancel-extension/);
+  assert.match(APP_JS, /edit-note/);
+  assert.match(APP_JS, /apply-note/);
+  assert.match(APP_JS, /cancel-note/);
   assert.match(APP_JS, /export-json/);
   assert.match(APP_JS, /new Blob/);
+  assert.doesNotMatch(APP_JS, /editedExtensions/);
 });

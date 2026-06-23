@@ -17,7 +17,7 @@ function renderInlineMarkdown(value) {
 
 function renderMarkdown(source) {
   const text = String(source ?? '').trim();
-  if (!text) return '<p class="empty-extension">暂无拓展</p>';
+  if (!text) return '<p class="empty-note">暂无笔记</p>';
 
   return text.split(/\n{2,}/).map((block) => {
     if (/^\`\`\`/.test(block)) {
@@ -63,37 +63,37 @@ if (search) {
 const booksDataScript = document.querySelector('#books-data');
 const exportButton = document.querySelector('#export-json');
 const booksData = booksDataScript ? JSON.parse(booksDataScript.textContent) : null;
-const editedExtensions = new Map();
+const editedNotes = new Map();
 
 for (const note of document.querySelectorAll('[data-note-id]')) {
-  const preview = note.querySelector('[data-extension-preview]');
-  const editor = note.querySelector('[data-extension-editor]');
-  const input = note.querySelector('[data-extension-input]');
-  const edit = note.querySelector('[data-action="edit-extension"]');
-  const apply = note.querySelector('[data-action="apply-extension"]');
-  const cancel = note.querySelector('[data-action="cancel-extension"]');
+  const preview = note.querySelector('[data-note-preview]');
+  const editor = note.querySelector('[data-note-editor]');
+  const input = note.querySelector('[data-note-input]');
+  const edit = note.querySelector('[data-action="edit-note"]');
+  const apply = note.querySelector('[data-action="apply-note"]');
+  const cancel = note.querySelector('[data-action="cancel-note"]');
 
   if (!preview || !editor || !input || !edit || !apply || !cancel) continue;
 
-  preview.innerHTML = renderMarkdown(note.dataset.extensionSource || '');
+  preview.innerHTML = renderMarkdown(note.dataset.noteSource || '');
 
   edit.addEventListener('click', () => {
-    input.value = note.dataset.extensionSource || '';
+    input.value = note.dataset.noteSource || '';
     editor.hidden = false;
     edit.hidden = true;
   });
 
   apply.addEventListener('click', () => {
-    note.dataset.extensionSource = input.value;
+    note.dataset.noteSource = input.value;
     preview.innerHTML = renderMarkdown(input.value);
-    editedExtensions.set(note.dataset.noteId, input.value);
+    editedNotes.set(note.dataset.noteId, input.value);
     editor.hidden = true;
     edit.hidden = false;
     if (exportButton) exportButton.disabled = false;
   });
 
   cancel.addEventListener('click', () => {
-    input.value = note.dataset.extensionSource || '';
+    input.value = note.dataset.noteSource || '';
     editor.hidden = true;
     edit.hidden = false;
   });
@@ -104,8 +104,8 @@ if (exportButton && booksData) {
     try {
       for (const book of booksData) {
         for (const note of book.notes || []) {
-          if (editedExtensions.has(note.id)) {
-            note.extension = editedExtensions.get(note.id);
+          if (editedNotes.has(note.id)) {
+            note.note = editedNotes.get(note.id);
             note.updatedAt = new Date().toISOString();
           }
         }

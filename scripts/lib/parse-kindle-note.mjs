@@ -61,17 +61,22 @@ function parseMarker(line) {
   if (englishMatch) {
     const marker = englishMatch[2];
     return {
+      kind: 'entry',
       location: marker.startsWith('Location') ? marker : '',
       page: marker.startsWith('Page') ? marker : ''
     };
   }
 
-  const chineseMatch = line.match(/^(?:标注(?:\(.+\))?|笔记)\s*-\s*(第\s*\d+\s*页)?(?:\s*·\s*)?(位置\s*\d+)?$/);
+  const chineseMatch = line.match(/^(标注(?:\(.+\))?|笔记|书签)\s*-\s*(第\s*\d+\s*页)?(?:\s*·\s*)?(位置\s*\d+)?$/);
   if (!chineseMatch) return null;
 
+  const label = chineseMatch[1];
+  const kind = label.startsWith('标注') ? 'highlight' : label === '笔记' ? 'note' : 'bookmark';
+
   return {
-    page: chineseMatch[1] ? normalizeText(chineseMatch[1]) : '',
-    location: chineseMatch[2] ? normalizeText(chineseMatch[2]) : ''
+    kind,
+    page: chineseMatch[2] ? normalizeText(chineseMatch[2]) : '',
+    location: chineseMatch[3] ? normalizeText(chineseMatch[3]) : ''
   };
 }
 
@@ -97,26 +102,46 @@ export function parseKindleSource(raw, { path = 'unknown' } = {}) {
     notes: []
   };
 
+  let lastHighlightNote = null;
+
   for (let index = firstMarkerIndex; index < lines.length; index += 1) {
     const marker = parseMarker(lines[index]);
     if (!marker) continue;
-
-    const quote = lines[index + 1] || '';
-    if (!quote || parseMarker(quote)) {
-      warnings.push({ path, reason: `Missing quote after ${lines[index]}` });
+    if (marker.kind === 'bookmark') {
+      lastHighlightNote = null;
       continue;
     }
 
-    book.notes.push({
-      id: createNoteId({ title, quote, location: marker.location, page: marker.page }),
+    const text = lines[index + 1] || '';
+    if (!text || parseMarker(text)) {
+      warnings.push({ path, reason: `Missing quote after ${lines[index]}` });
+      lastHighlightNote = null;
+      continue;
+    }
+
+    if (marker.kind === 'note' && lastHighlightNote) {
+      lastHighlightNote.note = text;
+      lastHighlightNote = null;
+      continue;
+    }
+
+    const quote = marker.kind === 'note' ? '' : text;
+    const note = marker.kind === 'note' ? text : '';
+    const idText = quote || note;
+    const parsedNote = {
+      id: createNoteId({ title, quote: idText, location: marker.location, page: marker.page }),
       quote,
+      note,
       location: marker.location,
       page: marker.page,
       highlightedAt: '',
       tags: [],
       status: 'new',
       extension: ''
-    });
+    };
+
+    book.notes.push(parsedNote);
+    lastHighlightNote = marker.kind === 'highlight' ? parsedNote : null;
   }
 
   if (book.notes.length === 0) {

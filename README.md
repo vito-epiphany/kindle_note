@@ -1,6 +1,6 @@
 # Kindle Note
 
-Local Kindle note library for importing saved Kindle note files, preserving personal extensions, and generating static HTML pages.
+Local Kindle note library for importing saved Kindle note files, preserving editable Markdown notes, and generating static HTML pages.
 
 ## Workflow
 
@@ -15,11 +15,11 @@ Local Kindle note library for importing saved Kindle note files, preserving pers
 - `data/sources.json` records imported source fingerprints and parser warnings.
 - `public/` is generated and can be rebuilt from `data/books.json`.
 
-Manual note extensions live in `data/books.json` under each note's `extension`, `tags`, and `status` fields. Re-importing the same Kindle note preserves those fields.
+Kindle highlights live in each note's `quote` field. Kindle notes and manual edits live in each note's `note` field as Markdown.
 
-## Editing Markdown Extensions
+## Editing Markdown Notes
 
-Book pages let you edit each note's `extension` field as Markdown. Click `Edit`, write Markdown, click `Apply`, then use `Export books.json` to download updated data.
+Book pages show original highlighted text as `原文` and editable Markdown notes as `笔记`. Click `Edit`, write Markdown, click `Apply`, then use `Export books.json` to download updated data.
 
 Because the site is static, the browser does not write directly to local files. Replace `data/books.json` with the exported file, then run:
 

@@ -33,10 +33,14 @@ test('parses Chinese Kindle Notebook HTML exports', async () => {
   assert.equal(result.books[0].title, '以日为鉴 衰退时代生存指南');
   assert.equal(result.books[0].author, '分析师Boden');
   assert.equal(result.books[0].notes.length, 2);
-  assert.equal(result.books[0].notes[0].quote, '在经历了接近一年半的横盘之后，日本土地价格终于支撑不住。');
-  assert.equal(result.books[0].notes[0].page, '第 24 页');
-  assert.equal(result.books[0].notes[0].location, '位置 314');
-  assert.equal(result.books[0].notes[1].quote, '可以看看现在房价和企业利润的关系');
+  assert.equal(result.books[0].notes[0].quote, '');
+  assert.equal(result.books[0].notes[0].note, '大宗商品代表信心，信心又代表什么呢');
+  assert.equal(result.books[0].notes[0].page, '第 8 页');
+  assert.equal(result.books[0].notes[0].location, '位置 87');
+  assert.equal(result.books[0].notes[1].quote, '在经历了接近一年半的横盘之后，日本土地价格终于支撑不住。');
+  assert.equal(result.books[0].notes[1].note, '可以看看现在房价和企业利润的关系');
+  assert.equal(result.books[0].notes[1].page, '第 24 页');
+  assert.equal(result.books[0].notes[1].location, '位置 314');
 });
 
 test('reports unsupported input without throwing', async () => {

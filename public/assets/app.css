@@ -108,34 +108,34 @@ blockquote {
   display: none !important;
 }
 
-.extension {
+.note-markdown {
   display: grid;
   gap: 10px;
 }
 
-.extension-preview {
+.note-preview {
   border-top: 1px solid var(--line);
   padding-top: 10px;
 }
 
-.extension-preview p,
-.extension-preview ul,
-.extension-preview ol,
-.extension-preview blockquote,
-.extension-preview pre,
-.extension-preview h1,
-.extension-preview h2,
-.extension-preview h3 {
+.note-preview p,
+.note-preview ul,
+.note-preview ol,
+.note-preview blockquote,
+.note-preview pre,
+.note-preview h1,
+.note-preview h2,
+.note-preview h3 {
   margin: 0 0 10px;
 }
 
-.extension-preview code {
+.note-preview code {
   background: var(--bg);
   border-radius: 4px;
   padding: 1px 4px;
 }
 
-.extension-editor textarea {
+.note-editor textarea {
   width: 100%;
   min-height: 140px;
   resize: vertical;
@@ -145,7 +145,7 @@ blockquote {
   font: inherit;
 }
 
-.extension-actions {
+.note-actions {
   display: flex;
   gap: 8px;
   margin-top: 8px;

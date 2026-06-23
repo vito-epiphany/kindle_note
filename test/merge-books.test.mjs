@@ -36,6 +36,7 @@ test('mergeBooks preserves user extension fields on repeated import', () => {
       highlightedAt: '',
       tags: ['attention'],
       status: 'expanded',
+      note: 'Edited markdown note.',
       extension: 'My own expansion.',
       createdAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-02T00:00:00.000Z'
@@ -47,7 +48,7 @@ test('mergeBooks preserves user extension fields on repeated import', () => {
     title: 'Deep Work',
     author: 'Cal Newport',
     source: 'kindle',
-    notes: [{ id: 'note-1', quote: 'Focus.', location: 'Location 1', page: '', highlightedAt: '', tags: [], status: 'new', extension: '' }]
+    notes: [{ id: 'note-1', quote: 'Focus.', location: 'Location 1', page: '', highlightedAt: '', tags: [], status: 'new', note: 'Imported note.', extension: '' }]
   }];
 
   const result = mergeBooks(existing, incoming, { now });
@@ -56,6 +57,7 @@ test('mergeBooks preserves user extension fields on repeated import', () => {
   assert.equal(result.books[0].notes.length, 1);
   assert.deepEqual(note.tags, ['attention']);
   assert.equal(note.status, 'expanded');
+  assert.equal(note.note, 'Edited markdown note.');
   assert.equal(note.extension, 'My own expansion.');
   assert.equal(note.updatedAt, '2026-01-02T00:00:00.000Z');
 });

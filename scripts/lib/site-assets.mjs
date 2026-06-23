@@ -108,34 +108,34 @@ blockquote {
   display: none !important;
 }
 
-.extension {
+.note-markdown {
   display: grid;
   gap: 10px;
 }
 
-.extension-preview {
+.note-preview {
   border-top: 1px solid var(--line);
   padding-top: 10px;
 }
 
-.extension-preview p,
-.extension-preview ul,
-.extension-preview ol,
-.extension-preview blockquote,
-.extension-preview pre,
-.extension-preview h1,
-.extension-preview h2,
-.extension-preview h3 {
+.note-preview p,
+.note-preview ul,
+.note-preview ol,
+.note-preview blockquote,
+.note-preview pre,
+.note-preview h1,
+.note-preview h2,
+.note-preview h3 {
   margin: 0 0 10px;
 }
 
-.extension-preview code {
+.note-preview code {
   background: var(--bg);
   border-radius: 4px;
   padding: 1px 4px;
 }
 
-.extension-editor textarea {
+.note-editor textarea {
   width: 100%;
   min-height: 140px;
   resize: vertical;
@@ -145,7 +145,7 @@ blockquote {
   font: inherit;
 }
 
-.extension-actions {
+.note-actions {
   display: flex;
   gap: 8px;
   margin-top: 8px;
@@ -194,7 +194,7 @@ function renderInlineMarkdown(value) {
 
 function renderMarkdown(source) {
   const text = String(source ?? '').trim();
-  if (!text) return '<p class="empty-extension">暂无拓展</p>';
+  if (!text) return '<p class="empty-note">暂无笔记</p>';
 
   return text.split(/\\n{2,}/).map((block) => {
     if (/^\\\`\\\`\\\`/.test(block)) {
@@ -240,37 +240,37 @@ if (search) {
 const booksDataScript = document.querySelector('#books-data');
 const exportButton = document.querySelector('#export-json');
 const booksData = booksDataScript ? JSON.parse(booksDataScript.textContent) : null;
-const editedExtensions = new Map();
+const editedNotes = new Map();
 
 for (const note of document.querySelectorAll('[data-note-id]')) {
-  const preview = note.querySelector('[data-extension-preview]');
-  const editor = note.querySelector('[data-extension-editor]');
-  const input = note.querySelector('[data-extension-input]');
-  const edit = note.querySelector('[data-action="edit-extension"]');
-  const apply = note.querySelector('[data-action="apply-extension"]');
-  const cancel = note.querySelector('[data-action="cancel-extension"]');
+  const preview = note.querySelector('[data-note-preview]');
+  const editor = note.querySelector('[data-note-editor]');
+  const input = note.querySelector('[data-note-input]');
+  const edit = note.querySelector('[data-action="edit-note"]');
+  const apply = note.querySelector('[data-action="apply-note"]');
+  const cancel = note.querySelector('[data-action="cancel-note"]');
 
   if (!preview || !editor || !input || !edit || !apply || !cancel) continue;
 
-  preview.innerHTML = renderMarkdown(note.dataset.extensionSource || '');
+  preview.innerHTML = renderMarkdown(note.dataset.noteSource || '');
 
   edit.addEventListener('click', () => {
-    input.value = note.dataset.extensionSource || '';
+    input.value = note.dataset.noteSource || '';
     editor.hidden = false;
     edit.hidden = true;
   });
 
   apply.addEventListener('click', () => {
-    note.dataset.extensionSource = input.value;
+    note.dataset.noteSource = input.value;
     preview.innerHTML = renderMarkdown(input.value);
-    editedExtensions.set(note.dataset.noteId, input.value);
+    editedNotes.set(note.dataset.noteId, input.value);
     editor.hidden = true;
     edit.hidden = false;
     if (exportButton) exportButton.disabled = false;
   });
 
   cancel.addEventListener('click', () => {
-    input.value = note.dataset.extensionSource || '';
+    input.value = note.dataset.noteSource || '';
     editor.hidden = true;
     edit.hidden = false;
   });
@@ -281,8 +281,8 @@ if (exportButton && booksData) {
     try {
       for (const book of booksData) {
         for (const note of book.notes || []) {
-          if (editedExtensions.has(note.id)) {
-            note.extension = editedExtensions.get(note.id);
+          if (editedNotes.has(note.id)) {
+            note.note = editedNotes.get(note.id);
             note.updatedAt = new Date().toISOString();
           }
         }
