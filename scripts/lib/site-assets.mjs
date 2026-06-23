@@ -116,13 +116,6 @@ textarea:focus {
   padding: 34px 22px 24px;
 }
 
-.back-link {
-  width: fit-content;
-  color: var(--rail-muted);
-  font-size: 14px;
-  text-decoration: none;
-}
-
 .library-section {
   display: grid;
   gap: 10px;
@@ -286,9 +279,7 @@ textarea:focus {
 }
 
 .note-list-item small,
-.meta,
-.status,
-.tag {
+.meta {
   color: var(--muted);
   font-size: 13px;
 }
@@ -320,12 +311,6 @@ textarea:focus {
   line-height: 1.1;
 }
 
-.status {
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 2px 10px;
-}
-
 .quote-block,
 .note-markdown {
   display: grid;
@@ -345,18 +330,6 @@ blockquote {
   font-size: 21px;
   font-weight: 650;
   line-height: 1.72;
-}
-
-.tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.tag {
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 2px 8px;
 }
 
 .note-input {
@@ -529,8 +502,6 @@ for (const button of collapseButtons) {
   });
 }
 
-const editedNotes = new Map();
-
 function noteStorageKey(noteId) {
   return 'kindle-note:' + noteId + ':note';
 }
@@ -543,15 +514,12 @@ for (const note of document.querySelectorAll('[data-note-id]')) {
     const savedNote = localStorage.getItem(noteStorageKey(note.dataset.noteId));
     if (savedNote !== null) {
       input.value = savedNote;
-      note.dataset.noteSource = savedNote;
     }
   } catch {
     // Local files can run in browser modes where storage is unavailable.
   }
 
   input.addEventListener('input', () => {
-    note.dataset.noteSource = input.value;
-    editedNotes.set(note.dataset.noteId, input.value);
     try {
       localStorage.setItem(noteStorageKey(note.dataset.noteId), input.value);
     } catch {

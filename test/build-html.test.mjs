@@ -51,7 +51,7 @@ test('renderBookPage escapes content and renders editable note fields', () => {
   assert.match(html, /attention/);
   assert.doesNotMatch(renderBookPage({ ...books[0], title: '<script>' }), /<script>/);
   assert.match(html, /data-note-id="note-1"/);
-  assert.match(html, /data-note-source="Connect this to planning blocks\."/);
+  assert.doesNotMatch(html, /data-note-source=/);
   assert.match(html, /class="reader-shell"/);
   assert.match(html, /class="library-pane"/);
   assert.match(html, /class="note-list-pane"/);
@@ -73,7 +73,12 @@ test('renderBookPage escapes content and renders editable note fields', () => {
   assert.doesNotMatch(html, /data-action="cancel-note"/);
   assert.doesNotMatch(html, /extension-preview/);
   assert.doesNotMatch(html, /id="export-json"/);
-  assert.match(html, /<script type="application\/json" id="books-data">/);
+  assert.doesNotMatch(html, /class="back-link"/);
+  assert.doesNotMatch(html, /全部图书/);
+  assert.doesNotMatch(html, /class="status"/);
+  assert.doesNotMatch(html, /class="tags"/);
+  assert.doesNotMatch(html, /class="tag"/);
+  assert.doesNotMatch(html, /id="books-data"/);
 });
 
 test('book page layout fills the viewport without decorative frames', () => {
@@ -139,9 +144,9 @@ test('build-html rebuilds referenced app assets from data/books.json', async () 
 
 test('app asset includes markdown note editing and export behavior', () => {
   assert.match(APP_JS, /addEventListener\('input'/);
-  assert.match(APP_JS, /editedNotes\.set/);
   assert.match(APP_JS, /localStorage\.getItem/);
   assert.match(APP_JS, /localStorage\.setItem/);
+  assert.doesNotMatch(APP_JS, /editedNotes/);
   assert.doesNotMatch(APP_JS, /function renderMarkdown/);
   assert.doesNotMatch(APP_JS, /escapeHtml/);
   assert.doesNotMatch(APP_JS, /edit-note/);

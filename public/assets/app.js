@@ -78,8 +78,6 @@ for (const button of collapseButtons) {
   });
 }
 
-const editedNotes = new Map();
-
 function noteStorageKey(noteId) {
   return 'kindle-note:' + noteId + ':note';
 }
@@ -92,15 +90,12 @@ for (const note of document.querySelectorAll('[data-note-id]')) {
     const savedNote = localStorage.getItem(noteStorageKey(note.dataset.noteId));
     if (savedNote !== null) {
       input.value = savedNote;
-      note.dataset.noteSource = savedNote;
     }
   } catch {
     // Local files can run in browser modes where storage is unavailable.
   }
 
   input.addEventListener('input', () => {
-    note.dataset.noteSource = input.value;
-    editedNotes.set(note.dataset.noteId, input.value);
     try {
       localStorage.setItem(noteStorageKey(note.dataset.noteId), input.value);
     } catch {

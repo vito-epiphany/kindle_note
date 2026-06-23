@@ -11,10 +11,6 @@ function escapeAttribute(value) {
   return escapeHtml(value).replace(/`/g, '&#96;');
 }
 
-function escapeScriptJson(value) {
-  return JSON.stringify(value).replace(/</g, '\\u003c');
-}
-
 function pageShell({ title, body, assetPrefix = '' }) {
   return `<!doctype html>
 <html lang="zh-CN">
@@ -115,11 +111,9 @@ export function renderBookPage(book, allBooks = [book]) {
   }).join('\n');
 
   const notes = bookNotes.map((note) => {
-    const tags = normalizeList(note.tags);
     const chapter = note.chapter || '未分章';
     const meta = [chapter, note.location, note.page, note.highlightedAt].filter(Boolean).join(' · ');
-    const searchable = `${note.quote || ''} ${note.note || ''} ${chapter} ${tags.join(' ')}`.toLowerCase();
-    const renderedTags = tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join('');
+    const searchable = `${note.quote || ''} ${note.note || ''} ${chapter} ${normalizeList(note.tags).join(' ')}`.toLowerCase();
     const noteText = note.note || '';
     const quoteBlock = note.quote
       ? `<section class="quote-block">
@@ -129,16 +123,11 @@ export function renderBookPage(book, allBooks = [book]) {
       : '';
     const isActive = note.id === firstNoteId;
 
-    return `<article class="note detail-card" data-note-id="${escapeAttribute(note.id)}" data-chapter="${escapeAttribute(chapter)}" data-note-source="${escapeAttribute(noteText)}" data-search="${escapeAttribute(searchable)}"${isActive ? '' : ' hidden'}>
+    return `<article class="note detail-card" data-note-id="${escapeAttribute(note.id)}" data-chapter="${escapeAttribute(chapter)}" data-search="${escapeAttribute(searchable)}"${isActive ? '' : ' hidden'}>
       <header class="detail-header">
-        <div>
-          <p class="eyebrow">${escapeHtml(chapter)}</p>
-          <h1>${note.quote ? '原文标注' : '读书笔记'}</h1>
-        </div>
-        <p class="status">${escapeHtml(note.status || 'new')}</p>
+        <h1>${note.quote ? '原文标注' : '读书笔记'}</h1>
       </header>
       <p class="meta">${escapeHtml(meta || 'No location')}</p>
-      <div class="tags">${renderedTags}</div>
       ${quoteBlock}
       <section class="note-markdown">
         <h2>笔记</h2>
@@ -151,7 +140,6 @@ export function renderBookPage(book, allBooks = [book]) {
     title: `${book.title} - Kindle Notes`,
     body: `  <main class="reader-shell">
     <aside class="library-pane">
-      <a class="back-link" href="../index.html">全部图书</a>
       <section class="library-section">
         <button type="button" class="section-toggle" data-collapse-target="books" aria-expanded="true">
           <span>图书</span>
@@ -181,7 +169,6 @@ export function renderBookPage(book, allBooks = [book]) {
     <section class="detail-pane">
       <section class="notes">${notes}</section>
     </section>
-    <script type="application/json" id="books-data">${escapeScriptJson(allBooks)}</script>
   </main>`,
     assetPrefix: '../'
   });
