@@ -1,0 +1,48 @@
+[
+  {
+    "id": "book-deep-work-cal-newport",
+    "title": "Deep Work",
+    "author": "Cal Newport",
+    "source": "kindle",
+    "notes": [
+      {
+        "highlightedAt": "",
+        "tags": [],
+        "status": "new",
+        "extension": "",
+        "id": "note-deep-work-5933a3dccf68",
+        "quote": "Focus deeply on cognitively demanding tasks.",
+        "location": "Location 42",
+        "page": "",
+        "createdAt": "2026-06-23T10:03:15.360Z",
+        "updatedAt": "2026-06-23T10:03:15.360Z"
+      },
+      {
+        "highlightedAt": "",
+        "tags": [],
+        "status": "new",
+        "extension": "",
+        "id": "note-deep-work-09013e7cc5b2",
+        "quote": "This connects to my morning planning habit.",
+        "location": "Location 45",
+        "page": "",
+        "createdAt": "2026-06-23T10:03:15.360Z",
+        "updatedAt": "2026-06-23T10:03:15.360Z"
+      },
+      {
+        "highlightedAt": "",
+        "tags": [],
+        "status": "new",
+        "extension": "",
+        "id": "note-deep-work-ebd61834c030",
+        "quote": "Attention residue reduces performance.",
+        "location": "",
+        "page": "Page 12",
+        "createdAt": "2026-06-23T10:03:15.360Z",
+        "updatedAt": "2026-06-23T10:03:15.360Z"
+      }
+    ],
+    "firstImportedAt": "2026-06-23T10:03:15.360Z",
+    "lastImportedAt": "2026-06-23T10:03:15.360Z"
+  }
+]

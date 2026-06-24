@@ -1,0 +1,15 @@
+{
+  "name": "kindle-note",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "import": "node scripts/import-notes.mjs",
+    "build": "node scripts/build-html.mjs",
+    "dev": "node scripts/serve-local.mjs 4173"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
