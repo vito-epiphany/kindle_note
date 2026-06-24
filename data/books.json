@@ -6,43 +6,157 @@
     "source": "kindle",
     "notes": [
       {
-        "highlightedAt": "",
-        "tags": [],
-        "status": "new",
-        "extension": "",
-        "id": "note-deep-work-5933a3dccf68",
-        "quote": "Focus deeply on cognitively demanding tasks.",
-        "location": "Location 42",
-        "page": "",
-        "createdAt": "2026-06-23T10:03:15.360Z",
-        "updatedAt": "2026-06-23T10:03:15.360Z"
-      },
-      {
-        "highlightedAt": "",
-        "tags": [],
-        "status": "new",
-        "extension": "",
         "id": "note-deep-work-09013e7cc5b2",
         "quote": "This connects to my morning planning habit.",
+        "note": "",
         "location": "Location 45",
         "page": "",
-        "createdAt": "2026-06-23T10:03:15.360Z",
-        "updatedAt": "2026-06-23T10:03:15.360Z"
-      },
-      {
+        "chapter": "",
         "highlightedAt": "",
         "tags": [],
         "status": "new",
         "extension": "",
+        "createdAt": "2026-06-23T10:03:15.360Z",
+        "updatedAt": "2026-06-23T10:03:15.360Z"
+      },
+      {
+        "id": "note-deep-work-5933a3dccf68",
+        "quote": "Focus deeply on cognitively demanding tasks.",
+        "note": "",
+        "location": "Location 42",
+        "page": "",
+        "chapter": "",
+        "highlightedAt": "",
+        "tags": [],
+        "status": "new",
+        "extension": "",
+        "createdAt": "2026-06-23T10:03:15.360Z",
+        "updatedAt": "2026-06-23T10:03:15.360Z"
+      },
+      {
         "id": "note-deep-work-ebd61834c030",
         "quote": "Attention residue reduces performance.",
+        "note": "",
         "location": "",
         "page": "Page 12",
+        "chapter": "",
+        "highlightedAt": "",
+        "tags": [],
+        "status": "new",
+        "extension": "",
         "createdAt": "2026-06-23T10:03:15.360Z",
         "updatedAt": "2026-06-23T10:03:15.360Z"
       }
     ],
     "firstImportedAt": "2026-06-23T10:03:15.360Z",
-    "lastImportedAt": "2026-06-23T10:03:15.360Z"
+    "lastImportedAt": "2026-06-24T06:42:44.876Z"
+  },
+  {
+    "id": "book-boden-z-library-sk-1lib-sk-z-lib-sk-boden",
+    "title": "以日为鉴 衰退时代生存指南 (分析师Boden) (z-library.sk, 1lib.sk, z-lib.sk)",
+    "author": "分析师Boden",
+    "source": "kindle",
+    "notes": [
+      {
+        "id": "note-boden-z-library-sk-1lib-sk-z-lib-sk-0031bed6c646",
+        "quote": "问题。“雇佣过剩”“设备过剩”与“债务过剩”后来被称为平成时期企业的三大过剩。",
+        "note": "后续影响",
+        "location": "位置 320",
+        "page": "第 24 页",
+        "chapter": "第二章 救老员工，还是大学生？ ——回顾日本大学生失业潮",
+        "highlightedAt": "",
+        "tags": [],
+        "status": "new",
+        "extension": "",
+        "createdAt": "2026-06-23T12:07:34.201Z",
+        "updatedAt": "2026-06-23T12:07:34.201Z"
+      },
+      {
+        "id": "note-boden-z-library-sk-1lib-sk-z-lib-sk-03732eee4c0c",
+        "quote": "在经历了接近一年半的横盘之后，日本土地价格终于支撑不住，东京地区 6个月内土地价格下挫超过 8%。而随着地产泡沫的正式破裂，同时暴跌的还有企业利润。",
+        "note": "可以看看现在繁房价和企业利润的关系",
+        "location": "位置 314",
+        "page": "第 24 页",
+        "chapter": "第二章 救老员工，还是大学生？ ——回顾日本大学生失业潮",
+        "highlightedAt": "",
+        "tags": [],
+        "status": "new",
+        "extension": "",
+        "createdAt": "2026-06-23T12:07:34.201Z",
+        "updatedAt": "2026-06-23T12:07:34.201Z"
+      },
+      {
+        "id": "note-boden-z-library-sk-1lib-sk-z-lib-sk-0da11d62bcd0",
+        "quote": "长野的诅咒”",
+        "note": "地方债务对就业影响",
+        "location": "位置 556",
+        "page": "第 39 页",
+        "chapter": "第三章 留在城市还是返乡的选择 ——回顾日本返乡就业潮：日本漂流一族的故事",
+        "highlightedAt": "",
+        "tags": [],
+        "status": "new",
+        "extension": "",
+        "createdAt": "2026-06-23T12:07:34.201Z",
+        "updatedAt": "2026-06-23T12:07:34.201Z"
+      },
+      {
+        "id": "note-boden-z-library-sk-1lib-sk-z-lib-sk-9db02e339066",
+        "quote": "低利率环境所提供的低廉资金使用成本，又给这种乐观情绪提供了最好的助燃剂。",
+        "note": "降息",
+        "location": "位置 325",
+        "page": "第 24 页",
+        "chapter": "第二章 救老员工，还是大学生？ ——回顾日本大学生失业潮",
+        "highlightedAt": "",
+        "tags": [],
+        "status": "new",
+        "extension": "",
+        "createdAt": "2026-06-23T12:07:34.201Z",
+        "updatedAt": "2026-06-23T12:07:34.201Z"
+      },
+      {
+        "id": "note-boden-z-library-sk-1lib-sk-z-lib-sk-aa6f6b3c0048",
+        "quote": "",
+        "note": "大宗商品代表信心，信心又代表什么呢",
+        "location": "位置 87",
+        "page": "第 8 页",
+        "chapter": "第一章 保就业，还是保发展？ ——回顾日本保就业史：为保就业付出了怎样的代价？",
+        "highlightedAt": "",
+        "tags": [],
+        "status": "new",
+        "extension": "",
+        "createdAt": "2026-06-23T12:07:34.201Z",
+        "updatedAt": "2026-06-23T12:07:34.201Z"
+      },
+      {
+        "id": "note-boden-z-library-sk-1lib-sk-z-lib-sk-c7f3d7ed55f7",
+        "quote": "",
+        "note": "22年还是大方的，交通住宿都包了",
+        "location": "位置 96",
+        "page": "第 9 页",
+        "chapter": "第一章 保就业，还是保发展？ ——回顾日本保就业史：为保就业付出了怎样的代价？",
+        "highlightedAt": "",
+        "tags": [],
+        "status": "new",
+        "extension": "",
+        "createdAt": "2026-06-23T12:07:34.201Z",
+        "updatedAt": "2026-06-23T12:07:34.201Z"
+      },
+      {
+        "id": "note-boden-z-library-sk-1lib-sk-z-lib-sk-f1e9f243b753",
+        "quote": "第一是海量基建资本从乡村抽离用以挽救倒闭企业，第二则是大量通过银行贷款修建的度假村由于银行体系的破产同样迎来了倒闭潮。简单来说乡村这套长期依赖举债基建的模式无法运行，由此用大基建营造出来的乡村就业繁荣开始破裂。",
+        "note": "不要盲目搞旅游.如何去割韭菜，面\n",
+        "location": "位置 547",
+        "page": "第 39 页",
+        "chapter": "第三章 留在城市还是返乡的选择 ——回顾日本返乡就业潮：日本漂流一族的故事",
+        "highlightedAt": "",
+        "tags": [],
+        "status": "new",
+        "extension": "",
+        "createdAt": "2026-06-23T12:07:34.201Z",
+        "updatedAt": "2026-06-24T06:43:38.128Z"
+      }
+    ],
+    "firstImportedAt": "2026-06-23T12:07:34.201Z",
+    "lastImportedAt": "2026-06-24T06:42:44.876Z"
   }
 ]
