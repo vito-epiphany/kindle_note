@@ -183,7 +183,6 @@ export function renderBookPage(book, allBooks = [book]) {
         <div class="note-mode-toggle" role="group" aria-label="Markdown view mode">
           <button type="button" class="note-mode-button" data-note-mode="edit" aria-pressed="true">编辑</button>
           <button type="button" class="note-mode-button" data-note-mode="preview" aria-pressed="false">预览</button>
-          <button type="button" class="note-mode-button" data-note-mode="split" aria-pressed="false">分栏</button>
         </div>
         <div class="note-workspace">
           <textarea class="note-input" data-note-input aria-label="Markdown note">${escapeHtml(noteText)}</textarea>
@@ -196,29 +195,38 @@ export function renderBookPage(book, allBooks = [book]) {
   return pageShell({
     title: `${book.title} - Kindle Notes`,
     body: `  <main class="reader-shell" data-reader-shell>
-    <aside class="library-pane">
-      <section class="library-section">
-        <button type="button" class="section-toggle" data-collapse-target="books" aria-expanded="true">
-          <span>图书</span>
-          <span aria-hidden="true">⌄</span>
+    <aside class="library-pane" data-sidebar-pane>
+      <div class="sidebar-controls">
+        <a class="app-brand" href="../index.html" aria-label="Kindle Note home">
+          <span class="app-name">Kindle Note</span>
+        </a>
+        <button type="button" class="sidebar-toggle" data-sidebar-toggle aria-expanded="true" aria-label="收起侧边栏" title="Hide sidebar">
+          <svg class="sidebar-toggle-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M4 6h11M4 12h11M4 18h11"></path>
+            <path d="M20 8l-4 4 4 4"></path>
+          </svg>
         </button>
-        <div class="library-books" data-collapse-panel="books">${bookItems}</div>
-      </section>
-      <section class="library-section">
-        <button type="button" class="section-toggle" data-collapse-target="chapters" aria-expanded="true">
-          <span>章节</span>
-          <span aria-hidden="true">⌄</span>
-        </button>
-        <div class="chapter-list" data-collapse-panel="chapters">${chapterItems}</div>
-      </section>
+      </div>
+      <div class="library-content">
+        <section class="library-section">
+          <button type="button" class="section-toggle" data-collapse-target="books" aria-expanded="true">
+            <span>图书</span>
+            <span aria-hidden="true">⌄</span>
+          </button>
+          <div class="library-books" data-collapse-panel="books">${bookItems}</div>
+        </section>
+        <section class="library-section">
+          <button type="button" class="section-toggle" data-collapse-target="chapters" aria-expanded="true">
+            <span>章节</span>
+            <span aria-hidden="true">⌄</span>
+          </button>
+          <div class="chapter-list" data-collapse-panel="chapters">${chapterItems}</div>
+        </section>
+      </div>
     </aside>
     <div class="sidebar-resizer" data-sidebar-resizer role="separator" aria-label="调整侧边栏宽度" aria-orientation="vertical" tabindex="0"></div>
     <aside class="note-list-pane">
       <header class="list-header">
-        <div>
-          <h1>${escapeHtml(book.title)}</h1>
-          <p>${escapeHtml(book.author || 'Unknown author')}</p>
-        </div>
         <input id="search" type="search" placeholder="搜索笔记" aria-label="Filter notes">
       </header>
       <section class="note-list">${noteList}</section>

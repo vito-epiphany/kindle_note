@@ -2,6 +2,7 @@ const search = document.querySelector('#search');
 const readerShell = document.querySelector('[data-reader-shell]');
 const sidebarResizer = document.querySelector('[data-sidebar-resizer]');
 const noteListResizer = document.querySelector('[data-note-list-resizer]');
+const sidebarToggle = document.querySelector('[data-sidebar-toggle]');
 const chapterButtons = [...document.querySelectorAll('[data-chapter-filter]')];
 const noteListItems = [...document.querySelectorAll('[data-note-target]')];
 const detailCards = [...document.querySelectorAll('.detail-card[data-note-id]')];
@@ -27,7 +28,9 @@ function maxLibraryWidth() {
 }
 
 function maxNoteListWidth() {
-  const libraryWidth = currentPaneWidth('--library-width', 320);
+  const libraryWidth = readerShell?.dataset.sidebarCollapsed === 'true'
+    ? currentPaneWidth('--library-collapsed-width', 48)
+    : currentPaneWidth('--library-width', 320);
   return Math.max(300, Math.min(620, shellWidth() - libraryWidth - minimumDetailWidth - resizerWidthTotal));
 }
 
@@ -42,14 +45,18 @@ function clampNoteListWidth(value) {
 function normalizePaneWidths() {
   if (!readerShell) return;
 
-  const libraryWidth = clampSidebarWidth(currentPaneWidth('--library-width', 320));
-  readerShell.style.setProperty('--library-width', libraryWidth + 'px');
+  if (readerShell.dataset.sidebarCollapsed !== 'true') {
+    const libraryWidth = clampSidebarWidth(currentPaneWidth('--library-width', 320));
+    readerShell.style.setProperty('--library-width', libraryWidth + 'px');
+  }
+
   const noteListWidth = clampNoteListWidth(currentPaneWidth('--note-list-width', 430));
   readerShell.style.setProperty('--note-list-width', noteListWidth + 'px');
 }
 
 function setSidebarWidth(value, options = {}) {
   if (!readerShell) return;
+  if (readerShell.dataset.sidebarCollapsed === 'true') return;
 
   const width = clampSidebarWidth(value);
   readerShell.style.setProperty('--library-width', width + 'px');
@@ -75,6 +82,27 @@ function setNoteListWidth(value, options = {}) {
     localStorage.setItem('kindle-note:note-list-width', width + 'px');
   } catch {
     // Width changes still apply for the current page without persisted storage.
+  }
+}
+
+function setSidebarCollapsed(isCollapsed, options = {}) {
+  if (!readerShell || !sidebarToggle) return;
+
+  readerShell.dataset.sidebarCollapsed = isCollapsed ? 'true' : 'false';
+  sidebarToggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+  sidebarToggle.setAttribute('aria-label', isCollapsed ? '展开侧边栏' : '收起侧边栏');
+  sidebarToggle.setAttribute('title', isCollapsed ? 'Show sidebar' : 'Hide sidebar');
+
+  if (!isCollapsed) {
+    normalizePaneWidths();
+  }
+
+  if (options.persist === false) return;
+
+  try {
+    localStorage.setItem('kindle-note:sidebar-collapsed', isCollapsed ? 'true' : 'false');
+  } catch {
+    // The current session can still toggle the sidebar without persisted storage.
   }
 }
 
@@ -116,6 +144,22 @@ if (readerShell && sidebarResizer) {
     event.preventDefault();
     const currentWidth = Number.parseInt(getComputedStyle(readerShell).getPropertyValue('--library-width'), 10) || 320;
     setSidebarWidth(currentWidth + (event.key === 'ArrowRight' ? 16 : -16));
+  });
+}
+
+if (readerShell && sidebarToggle) {
+  try {
+    setSidebarCollapsed(localStorage.getItem('kindle-note:sidebar-collapsed') === 'true', { persist: false });
+  } catch {
+    setSidebarCollapsed(false, { persist: false });
+  }
+
+  sidebarToggle.addEventListener('pointerdown', (event) => {
+    event.stopPropagation();
+  });
+
+  sidebarToggle.addEventListener('click', () => {
+    setSidebarCollapsed(readerShell.dataset.sidebarCollapsed !== 'true');
   });
 }
 
@@ -397,7 +441,7 @@ function renderMarkdown(value) {
 
 function autoSizeNoteInput(input) {
   input.style.height = 'auto';
-  input.style.height = Math.max(280, input.scrollHeight + 2) + 'px';
+  input.style.height = Math.max(220, input.scrollHeight + 2) + 'px';
 }
 
 function updateMarkdownPreview(note) {
