@@ -99,7 +99,7 @@ test('renderBookPage escapes content and renders editable note fields', () => {
   assert.doesNotMatch(html, /id="books-data"/);
 });
 
-test('renderBookPage shows legacy note-only entries as original text with an empty note editor', () => {
+test('renderBookPage keeps note-only entries out of original text', () => {
   const legacyBook = {
     ...books[0],
     notes: [{
@@ -111,12 +111,12 @@ test('renderBookPage shows legacy note-only entries as original text with an emp
   };
   const html = renderBookPage(legacyBook, [legacyBook]);
 
-  assert.match(html, /class="quote-block"/);
-  assert.match(html, /<blockquote>Standalone Kindle note text\.<\/blockquote>/);
-  assert.match(html, /<textarea class="note-input" data-note-input aria-label="Markdown note"><\/textarea>/);
+  assert.doesNotMatch(html, /class="quote-block"/);
+  assert.doesNotMatch(html, /<blockquote>Standalone Kindle note text\.<\/blockquote>/);
+  assert.match(html, /<textarea class="note-input" data-note-input aria-label="Markdown note">Standalone Kindle note text\.<\/textarea>/);
 });
 
-test('renderBookPage hides duplicated note text after note-only migration', () => {
+test('renderBookPage treats quote and note as separate fields', () => {
   const migratedBook = {
     ...books[0],
     notes: [{
@@ -129,7 +129,7 @@ test('renderBookPage hides duplicated note text after note-only migration', () =
   const html = renderBookPage(migratedBook, [migratedBook]);
 
   assert.match(html, /<blockquote>Standalone Kindle note text\.<\/blockquote>/);
-  assert.match(html, /<textarea class="note-input" data-note-input aria-label="Markdown note"><\/textarea>/);
+  assert.match(html, /<textarea class="note-input" data-note-input aria-label="Markdown note">Standalone Kindle note text\.<\/textarea>/);
 });
 
 test('book page layout fills the viewport without decorative frames', () => {

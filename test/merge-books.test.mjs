@@ -167,7 +167,7 @@ test('mergeBooks preserves edited note when repeated import changes note id at t
   assert.equal(note.updatedAt, '2026-01-02T00:00:00.000Z');
 });
 
-test('mergeBooks migrates legacy note-only import without duplicating text into editable note', () => {
+test('mergeBooks keeps imported standalone note text in note, not quote', () => {
   const existing = [{
     id: 'book-deep-work-cal-newport',
     title: 'Deep Work',
@@ -177,13 +177,13 @@ test('mergeBooks migrates legacy note-only import without duplicating text into 
     lastImportedAt: '2026-01-01T00:00:00.000Z',
     notes: [{
       id: 'note-1',
-      quote: '',
+      quote: 'Standalone Kindle note text.',
       location: 'Location 1',
       page: '',
       highlightedAt: '',
       tags: [],
       status: 'new',
-      note: 'Standalone Kindle note text.',
+      note: '',
       extension: '',
       createdAt: '2026-01-01T00:00:00.000Z',
       updatedAt: '2026-01-02T00:00:00.000Z'
@@ -197,13 +197,13 @@ test('mergeBooks migrates legacy note-only import without duplicating text into 
     source: 'kindle',
     notes: [{
       id: 'note-1',
-      quote: 'Standalone Kindle note text.',
+      quote: '',
       location: 'Location 1',
       page: '',
       highlightedAt: '',
       tags: [],
       status: 'new',
-      note: '',
+      note: 'Standalone Kindle note text.',
       extension: ''
     }]
   }];
@@ -211,8 +211,8 @@ test('mergeBooks migrates legacy note-only import without duplicating text into 
   const result = mergeBooks(existing, incoming, { now });
   const note = result.books[0].notes[0];
 
-  assert.equal(note.quote, 'Standalone Kindle note text.');
-  assert.equal(note.note, '');
+  assert.equal(note.quote, '');
+  assert.equal(note.note, 'Standalone Kindle note text.');
 });
 
 test('mergeBooks does not collapse different highlights that only share a page', () => {

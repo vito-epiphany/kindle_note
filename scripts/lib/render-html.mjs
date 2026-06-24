@@ -169,8 +169,8 @@ export function renderBookPage(book, allBooks = [book]) {
     const chapter = note.chapter || '未分章';
     const meta = [note.location, note.page, note.highlightedAt].filter(Boolean).join(' · ');
     const searchable = `${note.quote || ''} ${note.note || ''} ${chapter} ${normalizeList(note.tags).join(' ')}`.toLowerCase();
-    const displayQuote = note.quote || note.note || '';
-    const noteText = note.quote && note.note !== note.quote ? note.note || '' : '';
+    const displayQuote = note.quote || '';
+    const noteText = note.note || '';
     const quoteBlock = displayQuote
       ? `<section class="quote-block">
         <h2 class="section-label">原文</h2>

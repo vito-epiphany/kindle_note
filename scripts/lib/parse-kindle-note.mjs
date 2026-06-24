@@ -137,8 +137,8 @@ export function parseKindleSource(raw, { path = 'unknown' } = {}) {
       continue;
     }
 
-    const quote = text;
-    const note = '';
+    const quote = marker.kind === 'note' ? '' : text;
+    const note = marker.kind === 'note' ? text : '';
     const idText = quote || note;
     const parsedNote = {
       id: createNoteId({ title, quote: idText, location: marker.location, page: marker.page }),
