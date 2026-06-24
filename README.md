@@ -5,9 +5,9 @@ Local Kindle note library for importing saved Kindle note files, preserving edit
 ## Workflow
 
 1. Place `.txt`, `.html`, or `.eml` Kindle note files in `imports/`.
-2. Run `npm run import`.
-3. Run `npm run build`.
-4. Open `public/index.html`, or run `npm run dev` and open `http://localhost:4173`.
+2. Run `./kindle-notes import`.
+3. Run `./kindle-notes build`.
+4. Open `public/index.html`, or run `./kindle-notes serve` and open `http://localhost:4173`.
 
 ## Data
 
@@ -24,14 +24,15 @@ Book pages show original highlighted text as `原文` and editable Markdown note
 Because the site is static, the browser does not write directly to local files. Replace `data/books.json` with the exported file, then run:
 
 ```bash
-npm run build
+./kindle-notes build
 ```
 
 ## Commands
 
 ```bash
-npm test
-npm run import
-npm run build
-npm run dev
+./kindle-notes import
+./kindle-notes build
+./kindle-notes refresh
+./kindle-notes serve
+./kindle-notes test
 ```

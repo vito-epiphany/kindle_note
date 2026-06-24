@@ -1,0 +1,48 @@
+#!/usr/bin/env sh
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+cd "$ROOT"
+
+COMMAND="${1:-help}"
+if [ "$#" -gt 0 ]; then
+  shift
+fi
+
+case "$COMMAND" in
+  import)
+    node scripts/import-notes.mjs "$@"
+    ;;
+  build)
+    node scripts/build-html.mjs "$@"
+    ;;
+  refresh)
+    node scripts/import-notes.mjs
+    node scripts/build-html.mjs
+    ;;
+  serve)
+    PORT="${1:-4173}"
+    python3 -m http.server "$PORT" --directory public
+    ;;
+  test)
+    node --test test/*.test.mjs
+    ;;
+  help|--help|-h)
+    cat <<'EOF'
+Usage: ./kindle-notes <command>
+
+Commands:
+  import   Import Kindle note files from imports/
+  build    Generate static HTML into public/
+  refresh  Import notes, then rebuild static HTML
+  serve    Serve public/ locally on port 4173
+  test     Run the local test suite
+  help     Show this help
+EOF
+    ;;
+  *)
+    echo "Unknown command: $COMMAND" >&2
+    echo "Run ./kindle-notes help" >&2
+    exit 1
+    ;;
+esac
