@@ -72,6 +72,10 @@ test('renderBookPage escapes content and renders editable note fields', () => {
   assert.match(html, /data-collapse-panel="chapters"/);
   assert.match(html, /data-chapter="Focus rituals"/);
   assert.match(html, /Focus rituals/);
+  assert.doesNotMatch(html, /<small>Focus rituals · Location 42<\/small>/);
+  assert.doesNotMatch(html, /<p class="meta">Focus rituals · Location 42/);
+  assert.match(html, /<small>Location 42<\/small>/);
+  assert.match(html, /<p class="meta">Location 42<\/p>/);
   assert.doesNotMatch(html, /<button type="button" class="chapter-link"[^>]*>\s*<span>Focus rituals<\/span>\s*<small>/);
   assert.match(html, /class="quote-block"/);
   assert.match(html, /class="section-label">原文</);

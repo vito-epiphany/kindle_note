@@ -154,7 +154,7 @@ export function renderBookPage(book, allBooks = [book]) {
   const noteList = bookNotes.map((note) => {
     const tags = normalizeList(note.tags);
     const chapter = note.chapter || '未分章';
-    const meta = [chapter, note.location, note.page].filter(Boolean).join(' · ');
+    const meta = [note.location, note.page].filter(Boolean).join(' · ');
     const sourceText = note.quote || note.note || '空白笔记';
     const searchable = `${note.quote || ''} ${note.note || ''} ${chapter} ${tags.join(' ')}`.toLowerCase();
     const isActive = note.id === firstNoteId;
@@ -167,7 +167,7 @@ export function renderBookPage(book, allBooks = [book]) {
 
   const notes = bookNotes.map((note) => {
     const chapter = note.chapter || '未分章';
-    const meta = [chapter, note.location, note.page, note.highlightedAt].filter(Boolean).join(' · ');
+    const meta = [note.location, note.page, note.highlightedAt].filter(Boolean).join(' · ');
     const searchable = `${note.quote || ''} ${note.note || ''} ${chapter} ${normalizeList(note.tags).join(' ')}`.toLowerCase();
     const noteText = note.note || '';
     const quoteBlock = note.quote
