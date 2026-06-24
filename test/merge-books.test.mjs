@@ -110,3 +110,59 @@ test('mergeBooks refreshes imported chapter metadata on repeated import', () => 
   assert.equal(result.books[0].notes[0].chapter, 'Focus rituals');
   assert.equal(result.books[0].notes[0].note, 'Edited markdown note.');
 });
+
+test('mergeBooks preserves edited note when repeated import changes note id at the same position', () => {
+  const existing = [{
+    id: 'book-deep-work-cal-newport',
+    title: 'Deep Work',
+    author: 'Cal Newport',
+    source: 'kindle',
+    firstImportedAt: '2026-01-01T00:00:00.000Z',
+    lastImportedAt: '2026-01-01T00:00:00.000Z',
+    notes: [{
+      id: 'note-old',
+      quote: 'Focus.',
+      location: 'Location 1',
+      page: 'Page 8',
+      chapter: 'Focus rituals',
+      highlightedAt: '',
+      tags: ['attention'],
+      status: 'expanded',
+      note: 'Edited markdown note.',
+      extension: '',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z'
+    }]
+  }];
+
+  const incoming = [{
+    id: 'book-deep-work-cal-newport',
+    title: 'Deep Work',
+    author: 'Cal Newport',
+    source: 'kindle',
+    notes: [{
+      id: 'note-new',
+      quote: 'Focus, revised in the source file.',
+      location: 'Location 1',
+      page: 'Page 8',
+      chapter: 'Focus rituals',
+      highlightedAt: '',
+      tags: [],
+      status: 'new',
+      note: 'Imported conflicting note.',
+      extension: ''
+    }]
+  }];
+
+  const result = mergeBooks(existing, incoming, { now });
+  const note = result.books[0].notes[0];
+
+  assert.equal(result.books[0].notes.length, 1);
+  assert.equal(note.id, 'note-new');
+  assert.equal(note.quote, 'Focus, revised in the source file.');
+  assert.equal(note.note, 'Edited markdown note.');
+  assert.deepEqual(note.tags, ['attention']);
+  assert.equal(note.status, 'expanded');
+  assert.equal(note.createdAt, '2026-01-01T00:00:00.000Z');
+  assert.equal(note.updatedAt, '2026-01-02T00:00:00.000Z');
+});
