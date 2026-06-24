@@ -248,13 +248,6 @@ textarea:focus {
   line-height: 1.25;
 }
 
-.chapter-link small {
-  color: inherit;
-  font-size: 12px;
-  line-height: 1.35;
-  opacity: 0.75;
-}
-
 .library-book[aria-current="page"],
 .chapter-link[aria-current="true"] {
   background: var(--rail-active);

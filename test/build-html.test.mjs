@@ -72,6 +72,7 @@ test('renderBookPage escapes content and renders editable note fields', () => {
   assert.match(html, /data-collapse-panel="chapters"/);
   assert.match(html, /data-chapter="Focus rituals"/);
   assert.match(html, /Focus rituals/);
+  assert.doesNotMatch(html, /<button type="button" class="chapter-link"[^>]*>\s*<span>Focus rituals<\/span>\s*<small>/);
   assert.match(html, /class="quote-block"/);
   assert.match(html, /class="section-label">原文</);
   assert.match(html, /class="section-label">笔记</);
@@ -128,7 +129,7 @@ test('sidebar sections are collapsible and typographic hierarchy is explicit', (
   assert.match(APP_CSS, /\.library-book span\s*{[^}]*font-size: 15px/s);
   assert.match(APP_CSS, /\.library-book small\s*{[^}]*font-size: 12px/s);
   assert.match(APP_CSS, /\.chapter-link span\s*{[^}]*font-size: 13px/s);
-  assert.match(APP_CSS, /\.chapter-link small\s*{[^}]*font-size: 12px/s);
+  assert.doesNotMatch(APP_CSS, /\.chapter-link small/);
   assert.match(APP_JS, /data-collapse-target/);
   assert.match(APP_JS, /aria-expanded/);
   assert.match(APP_JS, /data-collapse-panel/);

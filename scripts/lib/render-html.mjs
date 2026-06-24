@@ -145,11 +145,9 @@ export function renderBookPage(book, allBooks = [book]) {
   }).join('\n');
 
   const chapterItems = chapters.map((chapter) => {
-    const count = bookNotes.filter((note) => (note.chapter || '未分章') === chapter).length;
     const isActive = chapter === activeChapter;
     return `<button type="button" class="chapter-link" data-chapter-filter="${escapeAttribute(chapter)}" aria-current="${isActive ? 'true' : 'false'}">
         <span>${escapeHtml(chapter)}</span>
-        <small>${count}</small>
       </button>`;
   }).join('\n');
 
