@@ -105,8 +105,8 @@ test('book page layout fills the viewport without decorative frames', () => {
   assert.match(APP_CSS, /cursor: col-resize/);
   assert.match(APP_CSS, /\.section-label\s*{/);
   assert.match(APP_CSS, /\.quote-block\s*{[^}]*background: #f7f7f5/s);
-  assert.match(APP_CSS, /\.note-markdown\s*{[^}]*border-top: 1px solid var\(--line\)/s);
-  assert.match(APP_CSS, /\.note-markdown\s*{[^}]*background: #fbfbfa/s);
+  assert.doesNotMatch(APP_CSS, /\.note-markdown\s*{[^}]*border:/s);
+  assert.doesNotMatch(APP_CSS, /\.note-markdown\s*{[^}]*background:/s);
   assert.match(APP_CSS, /\.note-input\s*{[^}]*min-height: 320px/s);
   assert.match(APP_CSS, /\.note-input\s*{[^}]*border: 1px solid var\(--line-strong\)/s);
   assert.match(APP_CSS, /\.note-input:focus\s*{[^}]*border-color: var\(--accent\)/s);

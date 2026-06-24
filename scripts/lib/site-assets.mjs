@@ -349,11 +349,6 @@ textarea:focus {
 .note-markdown {
   display: grid;
   gap: 14px;
-  border: 1px solid var(--line);
-  border-top: 1px solid var(--line);
-  border-radius: 8px;
-  background: #fbfbfa;
-  padding: 18px 20px 20px;
 }
 
 blockquote {
