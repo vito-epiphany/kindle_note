@@ -317,65 +317,56 @@ textarea:focus {
   min-width: 0;
   overflow: auto;
   background: var(--panel);
-  padding: 74px min(6vw, 88px) 56px;
+  padding: 52px min(5vw, 72px) 48px;
 }
 
 .detail-card {
   display: grid;
   width: 100%;
-  max-width: 980px;
-  gap: 28px;
+  max-width: 900px;
+  gap: 22px;
   margin: 0 auto;
-}
-
-.section-label {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0;
-  line-height: 1;
 }
 
 .quote-block {
   display: grid;
-  gap: 14px;
-  border-radius: 8px;
-  background: #f7f7f5;
-  padding: 18px 20px;
+  gap: 10px;
+  border-left: 4px solid var(--accent);
+  padding: 4px 0 4px 18px;
 }
 
 .note-markdown {
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 
 blockquote {
   margin: 0;
-  border-left: 4px solid var(--accent);
-  padding: 2px 0 2px 16px;
+  border: 0;
+  padding: 0;
   color: #3f3f3f;
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
-  line-height: 1.76;
+  line-height: 1.72;
 }
 
 .note-input {
   width: 100%;
-  min-height: 320px;
+  min-height: 280px;
   resize: vertical;
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: #ffffff;
-  padding: 14px 16px;
+  background: #fbfbfa;
+  padding: 16px 18px;
   color: #454545;
   font: inherit;
-  font-size: 17px;
+  font-size: 16px;
   line-height: 1.7;
 }
 
 .note-input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(230, 82, 94, 0.12);
+  box-shadow: 0 0 0 2px rgba(230, 82, 94, 0.12);
   outline: 0;
 }
 

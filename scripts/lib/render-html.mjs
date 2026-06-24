@@ -167,23 +167,19 @@ export function renderBookPage(book, allBooks = [book]) {
 
   const notes = bookNotes.map((note) => {
     const chapter = note.chapter || '未分章';
-    const meta = [note.location, note.page, note.highlightedAt].filter(Boolean).join(' · ');
     const searchable = `${note.quote || ''} ${note.note || ''} ${chapter} ${normalizeList(note.tags).join(' ')}`.toLowerCase();
     const displayQuote = note.quote || '';
     const noteText = note.note || '';
     const quoteBlock = displayQuote
       ? `<section class="quote-block">
-        <h2 class="section-label">原文</h2>
         <blockquote>${escapeHtml(displayQuote)}</blockquote>
       </section>`
       : '';
     const isActive = note.id === firstNoteId;
 
     return `<article class="note detail-card" data-note-id="${escapeAttribute(note.id)}" data-chapter="${escapeAttribute(chapter)}" data-search="${escapeAttribute(searchable)}"${isActive ? '' : ' hidden'}>
-      <p class="meta">${escapeHtml(meta || 'No location')}</p>
       ${quoteBlock}
       <section class="note-markdown">
-        <h2 class="section-label">笔记</h2>
         <textarea class="note-input" data-note-input aria-label="Markdown note">${escapeHtml(noteText)}</textarea>
       </section>
     </article>`;
