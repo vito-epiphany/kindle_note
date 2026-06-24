@@ -179,8 +179,16 @@ export function renderBookPage(book, allBooks = [book]) {
 
     return `<article class="note detail-card" data-note-id="${escapeAttribute(note.id)}" data-chapter="${escapeAttribute(chapter)}" data-search="${escapeAttribute(searchable)}"${isActive ? '' : ' hidden'}>
       ${quoteBlock}
-      <section class="note-markdown">
-        <textarea class="note-input" data-note-input aria-label="Markdown note">${escapeHtml(noteText)}</textarea>
+      <section class="note-markdown" data-note-markdown data-note-view="edit">
+        <div class="note-mode-toggle" role="group" aria-label="Markdown view mode">
+          <button type="button" class="note-mode-button" data-note-mode="edit" aria-pressed="true">编辑</button>
+          <button type="button" class="note-mode-button" data-note-mode="preview" aria-pressed="false">预览</button>
+          <button type="button" class="note-mode-button" data-note-mode="split" aria-pressed="false">分栏</button>
+        </div>
+        <div class="note-workspace">
+          <textarea class="note-input" data-note-input aria-label="Markdown note">${escapeHtml(noteText)}</textarea>
+          <div class="note-preview markdown-body" data-note-preview aria-label="Markdown preview"></div>
+        </div>
       </section>
     </article>`;
   }).join('\n');

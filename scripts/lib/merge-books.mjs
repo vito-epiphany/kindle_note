@@ -18,6 +18,35 @@ function notePositionKey(note) {
   return [location, page].join('|');
 }
 
+function locationNumber(value) {
+  const match = String(value || '').match(/\d+/);
+  return match ? Number(match[0]) : null;
+}
+
+function isStandaloneNotePair(candidate, incomingNote) {
+  if (!incomingNote.quote || !incomingNote.note || candidate.quote || !candidate.note) return false;
+  if (candidate.page !== incomingNote.page) return false;
+  if (candidate.chapter && incomingNote.chapter && candidate.chapter !== incomingNote.chapter) return false;
+
+  const candidateLocation = locationNumber(candidate.location);
+  const incomingLocation = locationNumber(incomingNote.location);
+  const isAdjacentLocation = candidateLocation !== null
+    && incomingLocation !== null
+    && candidateLocation >= incomingLocation
+    && candidateLocation - incomingLocation <= 1;
+
+  return candidate.note === incomingNote.note || isAdjacentLocation;
+}
+
+function findStandaloneNotePair(notesById, incomingNote, matchedId = '') {
+  for (const [id, note] of notesById.entries()) {
+    if (id === matchedId) continue;
+    if (isStandaloneNotePair(note, incomingNote)) return { id, note };
+  }
+
+  return null;
+}
+
 function mergeExistingNote(existingNote, incomingNote, now) {
   const restoredStandaloneNote = existingNote.quote
     && !existingNote.note
@@ -60,17 +89,31 @@ export function mergeBooks(existingBooks, incomingBooks, { now = new Date().toIS
       const positionKey = notePositionKey(incomingNote);
       const existingId = notesById.has(incomingNote.id) ? incomingNote.id : noteIdByPosition.get(positionKey);
       const existingNote = existingId ? notesById.get(existingId) : null;
+      const standalonePair = findStandaloneNotePair(notesById, incomingNote, existingId);
 
       if (existingNote) {
         if (existingId !== incomingNote.id) {
           notesById.delete(existingId);
         }
-        notesById.set(incomingNote.id, mergeExistingNote(existingNote, incomingNote, now));
+        const mergedNote = mergeExistingNote(existingNote, incomingNote, now);
+        if (standalonePair) {
+          notesById.delete(standalonePair.id);
+          mergedNote.note = standalonePair.note.note || mergedNote.note;
+          mergedNote.updatedAt = standalonePair.note.updatedAt || mergedNote.updatedAt;
+        }
+        notesById.set(incomingNote.id, mergedNote);
         if (positionKey) {
           noteIdByPosition.set(positionKey, incomingNote.id);
         }
       } else {
-        notesById.set(incomingNote.id, stampNewNote(incomingNote, now));
+        const stampedNote = stampNewNote(incomingNote, now);
+        if (standalonePair) {
+          notesById.delete(standalonePair.id);
+          stampedNote.note = standalonePair.note.note || stampedNote.note;
+          stampedNote.createdAt = standalonePair.note.createdAt || stampedNote.createdAt;
+          stampedNote.updatedAt = standalonePair.note.updatedAt || stampedNote.updatedAt;
+        }
+        notesById.set(incomingNote.id, stampedNote);
         if (positionKey) {
           noteIdByPosition.set(positionKey, incomingNote.id);
         }

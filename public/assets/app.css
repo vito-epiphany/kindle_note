@@ -337,7 +337,7 @@ textarea:focus {
 
 .note-markdown {
   display: grid;
-  gap: 10px;
+  gap: 14px;
 }
 
 blockquote {
@@ -368,6 +368,127 @@ blockquote {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(230, 82, 94, 0.12);
   outline: 0;
+}
+
+.note-mode-toggle {
+  display: inline-flex;
+  width: fit-content;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f3f3f1;
+}
+
+.note-mode-button {
+  min-height: 32px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.note-mode-button[aria-pressed="true"] {
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: 0 1px 8px rgba(40, 45, 48, 0.08);
+}
+
+.note-workspace {
+  display: grid;
+  gap: 14px;
+  align-items: start;
+}
+
+.note-preview {
+  min-height: 280px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfbfa;
+  padding: 16px 18px;
+  color: #454545;
+  font-size: 16px;
+  line-height: 1.72;
+}
+
+.note-markdown[data-note-view="edit"] .note-preview,
+.note-markdown[data-note-view="preview"] .note-input {
+  display: none;
+}
+
+.note-markdown[data-note-view="split"] .note-workspace {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.markdown-body > * + * {
+  margin-top: 0.8em;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  margin: 0;
+  color: #303030;
+  line-height: 1.28;
+}
+
+.markdown-body h1 {
+  font-size: 26px;
+}
+
+.markdown-body h2 {
+  font-size: 22px;
+}
+
+.markdown-body h3 {
+  font-size: 19px;
+}
+
+.markdown-body p,
+.markdown-body ul,
+.markdown-body ol {
+  margin-bottom: 0;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 1.4em;
+}
+
+.markdown-body blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 12px;
+  color: #5d5d5d;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.markdown-body code {
+  border-radius: 4px;
+  background: #eeeeec;
+  padding: 0.1em 0.35em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+}
+
+.markdown-body pre {
+  border-radius: 8px;
+  background: #282d30;
+  color: #f3f4f2;
+  padding: 14px 16px;
+}
+
+.markdown-body pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.markdown-body a {
+  color: var(--accent);
 }
 
 .note-actions {
@@ -444,5 +565,9 @@ pre {
 
   .note-list-pane {
     border-bottom: 1px solid var(--line);
+  }
+
+  .note-markdown[data-note-view="split"] .note-workspace {
+    grid-template-columns: 1fr;
   }
 }

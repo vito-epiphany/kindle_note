@@ -281,9 +281,145 @@ function scheduleNoteSave(noteId, value) {
   }, 350));
 }
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderInlineText(value) {
+  let html = escapeHtml(value);
+  html = html.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+  html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
+  return html;
+}
+
+function renderInlineMarkdown(value) {
+  const tick = String.fromCharCode(96);
+  return String(value ?? '').split(tick).map((part, index) => {
+    if (index % 2 === 1) return '<code>' + escapeHtml(part) + '</code>';
+    return renderInlineText(part);
+  }).join('');
+}
+
+function closeMarkdownList(output, listType) {
+  if (!listType) return '';
+
+  output.push('</' + listType + '>');
+  return '';
+}
+
+function renderMarkdown(value) {
+  const fence = String.fromCharCode(96, 96, 96);
+  const lines = String(value || '').replace(/\r\n/g, '\n').split('\n');
+  const output = [];
+  const codeLines = [];
+  let listType = '';
+  let inCode = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (trimmed.startsWith(fence)) {
+      if (inCode) {
+        output.push('<pre><code>' + escapeHtml(codeLines.join('\n')) + '</code></pre>');
+        codeLines.length = 0;
+        inCode = false;
+      } else {
+        listType = closeMarkdownList(output, listType);
+        inCode = true;
+      }
+      continue;
+    }
+
+    if (inCode) {
+      codeLines.push(line);
+      continue;
+    }
+
+    if (!trimmed) {
+      listType = closeMarkdownList(output, listType);
+      continue;
+    }
+
+    const heading = trimmed.match(/^(#{1,6})\s+(.+)$/);
+    if (heading) {
+      listType = closeMarkdownList(output, listType);
+      const level = heading[1].length;
+      output.push('<h' + level + '>' + renderInlineMarkdown(heading[2]) + '</h' + level + '>');
+      continue;
+    }
+
+    if (trimmed.startsWith('> ')) {
+      listType = closeMarkdownList(output, listType);
+      output.push('<blockquote>' + renderInlineMarkdown(trimmed.slice(2)) + '</blockquote>');
+      continue;
+    }
+
+    const unordered = trimmed.match(/^[-*]\s+(.+)$/);
+    if (unordered) {
+      if (listType !== 'ul') {
+        listType = closeMarkdownList(output, listType);
+        output.push('<ul>');
+        listType = 'ul';
+      }
+      output.push('<li>' + renderInlineMarkdown(unordered[1]) + '</li>');
+      continue;
+    }
+
+    const ordered = trimmed.match(/^(\d+)\.\s+(.+)$/);
+    if (ordered) {
+      if (listType !== 'ol') {
+        listType = closeMarkdownList(output, listType);
+        output.push('<ol start="' + escapeHtml(ordered[1]) + '">');
+        listType = 'ol';
+      }
+      output.push('<li>' + renderInlineMarkdown(ordered[2]) + '</li>');
+      continue;
+    }
+
+    listType = closeMarkdownList(output, listType);
+    output.push('<p>' + renderInlineMarkdown(trimmed) + '</p>');
+  }
+
+  if (inCode) {
+    output.push('<pre><code>' + escapeHtml(codeLines.join('\n')) + '</code></pre>');
+  }
+
+  closeMarkdownList(output, listType);
+
+  return output.join('') || '<p class="empty-preview">空白笔记</p>';
+}
+
+function autoSizeNoteInput(input) {
+  input.style.height = 'auto';
+  input.style.height = Math.max(280, input.scrollHeight + 2) + 'px';
+}
+
+function updateMarkdownPreview(note) {
+  const input = note.querySelector('[data-note-input]');
+  const preview = note.querySelector('[data-note-preview]');
+  if (!input || !preview) return;
+
+  preview.innerHTML = renderMarkdown(input.value);
+}
+
+function setMarkdownView(markdownRoot, mode) {
+  markdownRoot.dataset.noteView = mode;
+
+  for (const button of markdownRoot.querySelectorAll('[data-note-mode]')) {
+    button.setAttribute('aria-pressed', button.dataset.noteMode === mode ? 'true' : 'false');
+  }
+}
+
 for (const note of document.querySelectorAll('[data-note-id]')) {
   const input = note.querySelector('[data-note-input]');
   if (!input) continue;
+  const markdownRoot = note.querySelector('[data-note-markdown]');
 
   if (!canSaveToServer()) {
     try {
@@ -296,7 +432,18 @@ for (const note of document.querySelectorAll('[data-note-id]')) {
     }
   }
 
+  updateMarkdownPreview(note);
+  autoSizeNoteInput(input);
+
+  if (markdownRoot) {
+    for (const button of markdownRoot.querySelectorAll('[data-note-mode]')) {
+      button.addEventListener('click', () => setMarkdownView(markdownRoot, button.dataset.noteMode || 'edit'));
+    }
+  }
+
   input.addEventListener('input', () => {
+    autoSizeNoteInput(input);
+    updateMarkdownPreview(note);
     scheduleNoteSave(note.dataset.noteId, input.value);
   });
 }

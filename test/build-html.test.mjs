@@ -82,10 +82,15 @@ test('renderBookPage escapes content and renders editable note fields', () => {
   assert.doesNotMatch(html, />原文</);
   assert.doesNotMatch(html, />笔记</);
   assert.match(html, /class="note-markdown"/);
+  assert.match(html, /class="note-mode-toggle"/);
+  assert.match(html, /data-note-mode="edit"/);
+  assert.match(html, /data-note-mode="preview"/);
+  assert.match(html, /data-note-mode="split"/);
   assert.match(html, /class="note-input"/);
+  assert.match(html, /class="note-preview markdown-body"/);
+  assert.match(html, /data-note-preview/);
   assert.doesNotMatch(html, /window-controls/);
   assert.doesNotMatch(html, /detail-toolbar/);
-  assert.doesNotMatch(html, /class="note-preview"/);
   assert.doesNotMatch(html, /class="note-editor"/);
   assert.doesNotMatch(html, /data-action="edit-note"/);
   assert.doesNotMatch(html, /data-action="apply-note"/);
@@ -162,7 +167,11 @@ test('book page layout fills the viewport without decorative frames', () => {
   assert.doesNotMatch(APP_CSS, /\.detail-toolbar/);
   assert.doesNotMatch(APP_CSS, /\.detail-header/);
   assert.doesNotMatch(APP_CSS, /\.eyebrow/);
-  assert.doesNotMatch(APP_CSS, /\.note-preview/);
+  assert.match(APP_CSS, /\.note-mode-toggle\s*{/);
+  assert.match(APP_CSS, /\.note-mode-button\[aria-pressed="true"\]\s*{/);
+  assert.match(APP_CSS, /\.note-workspace\s*{/);
+  assert.match(APP_CSS, /\.note-preview\s*{/);
+  assert.match(APP_CSS, /\.note-markdown\[data-note-view="split"\]\s+\.note-workspace\s*{/);
 });
 
 test('note list items show one summary line and one location line', () => {
@@ -294,8 +303,12 @@ test('app asset includes markdown note editing and export behavior', () => {
   assert.match(APP_JS, /saveNoteToServer/);
   assert.match(APP_JS, /saveNoteFallback/);
   assert.doesNotMatch(APP_JS, /editedNotes/);
-  assert.doesNotMatch(APP_JS, /function renderMarkdown/);
-  assert.doesNotMatch(APP_JS, /escapeHtml/);
+  assert.match(APP_JS, /function renderMarkdown/);
+  assert.match(APP_JS, /function renderInlineMarkdown/);
+  assert.match(APP_JS, /function escapeHtml/);
+  assert.match(APP_JS, /data-note-preview/);
+  assert.match(APP_JS, /data-note-mode/);
+  assert.match(APP_JS, /function autoSizeNoteInput/);
   assert.doesNotMatch(APP_JS, /edit-note/);
   assert.doesNotMatch(APP_JS, /apply-note/);
   assert.doesNotMatch(APP_JS, /cancel-note/);

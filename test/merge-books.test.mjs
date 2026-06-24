@@ -167,6 +167,73 @@ test('mergeBooks preserves edited note when repeated import changes note id at t
   assert.equal(note.updatedAt, '2026-01-02T00:00:00.000Z');
 });
 
+test('mergeBooks folds old standalone Kindle notes into paired highlight notes', () => {
+  const existing = [{
+    id: 'book-deep-work-cal-newport',
+    title: 'Deep Work',
+    author: 'Cal Newport',
+    source: 'kindle',
+    firstImportedAt: '2026-01-01T00:00:00.000Z',
+    lastImportedAt: '2026-01-01T00:00:00.000Z',
+    notes: [{
+      id: 'note-highlight-old',
+      quote: 'Family car purchases signal confidence.',
+      location: 'Location 86',
+      page: 'Page 8',
+      chapter: 'Confidence',
+      highlightedAt: '',
+      tags: ['macro'],
+      status: 'expanded',
+      note: '',
+      extension: '',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z'
+    }, {
+      id: 'note-standalone-old',
+      quote: '',
+      location: 'Location 87',
+      page: 'Page 8',
+      chapter: 'Confidence',
+      highlightedAt: '',
+      tags: [],
+      status: 'new',
+      note: 'Edited markdown note wins.',
+      extension: '',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-03T00:00:00.000Z'
+    }]
+  }];
+
+  const incoming = [{
+    id: 'book-deep-work-cal-newport',
+    title: 'Deep Work',
+    author: 'Cal Newport',
+    source: 'kindle',
+    notes: [{
+      id: 'note-highlight-new',
+      quote: 'Family car purchases signal confidence.',
+      location: 'Location 86',
+      page: 'Page 8',
+      chapter: 'Confidence',
+      highlightedAt: '',
+      tags: [],
+      status: 'new',
+      note: 'Imported note text.',
+      extension: ''
+    }]
+  }];
+
+  const result = mergeBooks(existing, incoming, { now });
+  const notes = result.books[0].notes;
+
+  assert.equal(notes.length, 1);
+  assert.equal(notes[0].id, 'note-highlight-new');
+  assert.equal(notes[0].quote, 'Family car purchases signal confidence.');
+  assert.equal(notes[0].note, 'Edited markdown note wins.');
+  assert.deepEqual(notes[0].tags, ['macro']);
+  assert.equal(notes[0].status, 'expanded');
+});
+
 test('mergeBooks keeps imported standalone note text in note, not quote', () => {
   const existing = [{
     id: 'book-deep-work-cal-newport',

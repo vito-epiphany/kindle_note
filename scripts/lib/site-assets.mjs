@@ -337,7 +337,7 @@ textarea:focus {
 
 .note-markdown {
   display: grid;
-  gap: 10px;
+  gap: 14px;
 }
 
 blockquote {
@@ -368,6 +368,127 @@ blockquote {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(230, 82, 94, 0.12);
   outline: 0;
+}
+
+.note-mode-toggle {
+  display: inline-flex;
+  width: fit-content;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f3f3f1;
+}
+
+.note-mode-button {
+  min-height: 32px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 0 12px;
+  font-size: 13px;
+}
+
+.note-mode-button[aria-pressed="true"] {
+  background: var(--panel);
+  color: var(--text);
+  box-shadow: 0 1px 8px rgba(40, 45, 48, 0.08);
+}
+
+.note-workspace {
+  display: grid;
+  gap: 14px;
+  align-items: start;
+}
+
+.note-preview {
+  min-height: 280px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfbfa;
+  padding: 16px 18px;
+  color: #454545;
+  font-size: 16px;
+  line-height: 1.72;
+}
+
+.note-markdown[data-note-view="edit"] .note-preview,
+.note-markdown[data-note-view="preview"] .note-input {
+  display: none;
+}
+
+.note-markdown[data-note-view="split"] .note-workspace {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.markdown-body > * + * {
+  margin-top: 0.8em;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  margin: 0;
+  color: #303030;
+  line-height: 1.28;
+}
+
+.markdown-body h1 {
+  font-size: 26px;
+}
+
+.markdown-body h2 {
+  font-size: 22px;
+}
+
+.markdown-body h3 {
+  font-size: 19px;
+}
+
+.markdown-body p,
+.markdown-body ul,
+.markdown-body ol {
+  margin-bottom: 0;
+}
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 1.4em;
+}
+
+.markdown-body blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 12px;
+  color: #5d5d5d;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.markdown-body code {
+  border-radius: 4px;
+  background: #eeeeec;
+  padding: 0.1em 0.35em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+}
+
+.markdown-body pre {
+  border-radius: 8px;
+  background: #282d30;
+  color: #f3f4f2;
+  padding: 14px 16px;
+}
+
+.markdown-body pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.markdown-body a {
+  color: var(--accent);
 }
 
 .note-actions {
@@ -444,6 +565,10 @@ pre {
 
   .note-list-pane {
     border-bottom: 1px solid var(--line);
+  }
+
+  .note-markdown[data-note-view="split"] .note-workspace {
+    grid-template-columns: 1fr;
   }
 }
 `;
@@ -731,9 +856,145 @@ function scheduleNoteSave(noteId, value) {
   }, 350));
 }
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function renderInlineText(value) {
+  let html = escapeHtml(value);
+  html = html.replace(/\\[([^\\]]+)\\]\\((https?:\\/\\/[^\\s)]+)\\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+  html = html.replace(/\\*\\*([^*]+)\\*\\*/g, '<strong>$1</strong>');
+  html = html.replace(/(^|[^*])\\*([^*]+)\\*/g, '$1<em>$2</em>');
+  return html;
+}
+
+function renderInlineMarkdown(value) {
+  const tick = String.fromCharCode(96);
+  return String(value ?? '').split(tick).map((part, index) => {
+    if (index % 2 === 1) return '<code>' + escapeHtml(part) + '</code>';
+    return renderInlineText(part);
+  }).join('');
+}
+
+function closeMarkdownList(output, listType) {
+  if (!listType) return '';
+
+  output.push('</' + listType + '>');
+  return '';
+}
+
+function renderMarkdown(value) {
+  const fence = String.fromCharCode(96, 96, 96);
+  const lines = String(value || '').replace(/\\r\\n/g, '\\n').split('\\n');
+  const output = [];
+  const codeLines = [];
+  let listType = '';
+  let inCode = false;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    if (trimmed.startsWith(fence)) {
+      if (inCode) {
+        output.push('<pre><code>' + escapeHtml(codeLines.join('\\n')) + '</code></pre>');
+        codeLines.length = 0;
+        inCode = false;
+      } else {
+        listType = closeMarkdownList(output, listType);
+        inCode = true;
+      }
+      continue;
+    }
+
+    if (inCode) {
+      codeLines.push(line);
+      continue;
+    }
+
+    if (!trimmed) {
+      listType = closeMarkdownList(output, listType);
+      continue;
+    }
+
+    const heading = trimmed.match(/^(#{1,6})\\s+(.+)$/);
+    if (heading) {
+      listType = closeMarkdownList(output, listType);
+      const level = heading[1].length;
+      output.push('<h' + level + '>' + renderInlineMarkdown(heading[2]) + '</h' + level + '>');
+      continue;
+    }
+
+    if (trimmed.startsWith('> ')) {
+      listType = closeMarkdownList(output, listType);
+      output.push('<blockquote>' + renderInlineMarkdown(trimmed.slice(2)) + '</blockquote>');
+      continue;
+    }
+
+    const unordered = trimmed.match(/^[-*]\\s+(.+)$/);
+    if (unordered) {
+      if (listType !== 'ul') {
+        listType = closeMarkdownList(output, listType);
+        output.push('<ul>');
+        listType = 'ul';
+      }
+      output.push('<li>' + renderInlineMarkdown(unordered[1]) + '</li>');
+      continue;
+    }
+
+    const ordered = trimmed.match(/^(\\d+)\\.\\s+(.+)$/);
+    if (ordered) {
+      if (listType !== 'ol') {
+        listType = closeMarkdownList(output, listType);
+        output.push('<ol start="' + escapeHtml(ordered[1]) + '">');
+        listType = 'ol';
+      }
+      output.push('<li>' + renderInlineMarkdown(ordered[2]) + '</li>');
+      continue;
+    }
+
+    listType = closeMarkdownList(output, listType);
+    output.push('<p>' + renderInlineMarkdown(trimmed) + '</p>');
+  }
+
+  if (inCode) {
+    output.push('<pre><code>' + escapeHtml(codeLines.join('\\n')) + '</code></pre>');
+  }
+
+  closeMarkdownList(output, listType);
+
+  return output.join('') || '<p class="empty-preview">空白笔记</p>';
+}
+
+function autoSizeNoteInput(input) {
+  input.style.height = 'auto';
+  input.style.height = Math.max(280, input.scrollHeight + 2) + 'px';
+}
+
+function updateMarkdownPreview(note) {
+  const input = note.querySelector('[data-note-input]');
+  const preview = note.querySelector('[data-note-preview]');
+  if (!input || !preview) return;
+
+  preview.innerHTML = renderMarkdown(input.value);
+}
+
+function setMarkdownView(markdownRoot, mode) {
+  markdownRoot.dataset.noteView = mode;
+
+  for (const button of markdownRoot.querySelectorAll('[data-note-mode]')) {
+    button.setAttribute('aria-pressed', button.dataset.noteMode === mode ? 'true' : 'false');
+  }
+}
+
 for (const note of document.querySelectorAll('[data-note-id]')) {
   const input = note.querySelector('[data-note-input]');
   if (!input) continue;
+  const markdownRoot = note.querySelector('[data-note-markdown]');
 
   if (!canSaveToServer()) {
     try {
@@ -746,7 +1007,18 @@ for (const note of document.querySelectorAll('[data-note-id]')) {
     }
   }
 
+  updateMarkdownPreview(note);
+  autoSizeNoteInput(input);
+
+  if (markdownRoot) {
+    for (const button of markdownRoot.querySelectorAll('[data-note-mode]')) {
+      button.addEventListener('click', () => setMarkdownView(markdownRoot, button.dataset.noteMode || 'edit'));
+    }
+  }
+
   input.addEventListener('input', () => {
+    autoSizeNoteInput(input);
+    updateMarkdownPreview(note);
     scheduleNoteSave(note.dataset.noteId, input.value);
   });
 }
