@@ -75,11 +75,12 @@ test('renderBookPage escapes content and renders editable note fields', () => {
   assert.doesNotMatch(html, /<small>Focus rituals · Location 42<\/small>/);
   assert.doesNotMatch(html, /<p class="meta">Focus rituals · Location 42/);
   assert.match(html, /<small>Location 42<\/small>/);
-  assert.match(html, /<p class="meta">Location 42<\/p>/);
+  assert.doesNotMatch(html, /<p class="meta">Location 42<\/p>/);
   assert.doesNotMatch(html, /<button type="button" class="chapter-link"[^>]*>\s*<span>Focus rituals<\/span>\s*<small>/);
   assert.match(html, /class="quote-block"/);
-  assert.match(html, /class="section-label">原文</);
-  assert.match(html, /class="section-label">笔记</);
+  assert.doesNotMatch(html, /class="section-label"/);
+  assert.doesNotMatch(html, />原文</);
+  assert.doesNotMatch(html, />笔记</);
   assert.match(html, /class="note-markdown"/);
   assert.match(html, /class="note-input"/);
   assert.doesNotMatch(html, /window-controls/);
@@ -144,7 +145,7 @@ test('book page layout fills the viewport without decorative frames', () => {
   assert.doesNotMatch(APP_CSS, /\.sidebar-resizer::before,\s*\.note-list-resizer::before\s*{/s);
   assert.match(APP_CSS, /\.sidebar-resizer\s*{[^}]*background: var\(--rail\)/s);
   assert.match(APP_CSS, /\.note-list-resizer\s*{[^}]*background: var\(--paper\)/s);
-  assert.match(APP_CSS, /\.section-label\s*{/);
+  assert.doesNotMatch(APP_CSS, /\.section-label\s*{/);
   assert.match(APP_CSS, /\.detail-pane\s*{[^}]*padding: 52px min\(5vw, 72px\) 48px/s);
   assert.match(APP_CSS, /\.detail-card\s*{[^}]*max-width: 900px/s);
   assert.doesNotMatch(APP_CSS, /\.quote-block\s*{[^}]*background: #f7f7f5/s);

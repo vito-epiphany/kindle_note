@@ -328,14 +328,6 @@ textarea:focus {
   margin: 0 auto;
 }
 
-.section-label {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0;
-  line-height: 1;
-}
-
 .quote-block {
   display: grid;
   gap: 10px;
