@@ -176,6 +176,8 @@ textarea:focus {
 
 .section-toggle::after {
   display: block;
+  grid-column: 2;
+  grid-row: 1;
   height: 1px;
   background: rgba(243, 244, 242, 0.22);
   content: "";
@@ -186,6 +188,9 @@ textarea:focus {
 }
 
 .section-toggle span:last-child {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
   color: var(--rail-muted);
   transition: transform 120ms ease;
 }
