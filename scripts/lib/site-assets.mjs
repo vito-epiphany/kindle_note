@@ -332,19 +332,32 @@ textarea:focus {
 .detail-card {
   display: grid;
   width: 100%;
-  max-width: 1120px;
-  gap: 22px;
+  max-width: 980px;
+  gap: 28px;
   margin: 0 auto;
 }
 
-.quote-block,
-.note-markdown {
-  display: grid;
-  gap: 12px;
+.section-label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1;
 }
 
-.quote-block h2 {
-  font-size: 18px;
+.quote-block {
+  display: grid;
+  gap: 14px;
+  border-radius: 8px;
+  background: #f7f7f5;
+  padding: 18px 20px;
+}
+
+.note-markdown {
+  display: grid;
+  gap: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 22px;
 }
 
 blockquote {
@@ -352,9 +365,9 @@ blockquote {
   border-left: 4px solid var(--accent);
   padding: 2px 0 2px 16px;
   color: #3f3f3f;
-  font-size: 21px;
-  font-weight: 650;
-  line-height: 1.72;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.76;
 }
 
 .note-input {

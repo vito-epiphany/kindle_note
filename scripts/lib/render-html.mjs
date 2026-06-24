@@ -174,7 +174,7 @@ export function renderBookPage(book, allBooks = [book]) {
     const noteText = note.note || '';
     const quoteBlock = note.quote
       ? `<section class="quote-block">
-        <h2>原文</h2>
+        <h2 class="section-label">原文</h2>
         <blockquote>${escapeHtml(note.quote)}</blockquote>
       </section>`
       : '';
@@ -184,6 +184,7 @@ export function renderBookPage(book, allBooks = [book]) {
       <p class="meta">${escapeHtml(meta || 'No location')}</p>
       ${quoteBlock}
       <section class="note-markdown">
+        <h2 class="section-label">笔记</h2>
         <textarea class="note-input" data-note-input aria-label="Markdown note">${escapeHtml(noteText)}</textarea>
       </section>
     </article>`;

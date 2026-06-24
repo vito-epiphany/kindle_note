@@ -52,7 +52,6 @@ test('renderBookPage escapes content and renders editable note fields', () => {
   assert.doesNotMatch(renderBookPage({ ...books[0], title: '<script>' }), /<script>/);
   assert.match(html, /data-note-id="note-1"/);
   assert.doesNotMatch(html, /data-note-source=/);
-  assert.doesNotMatch(html, />笔记</);
   assert.doesNotMatch(html, />读书笔记</);
   assert.doesNotMatch(html, />原文标注</);
   assert.doesNotMatch(html, /class="eyebrow"/);
@@ -74,6 +73,9 @@ test('renderBookPage escapes content and renders editable note fields', () => {
   assert.match(html, /data-chapter="Focus rituals"/);
   assert.match(html, /Focus rituals/);
   assert.match(html, /class="quote-block"/);
+  assert.match(html, /class="section-label">原文</);
+  assert.match(html, /class="section-label">笔记</);
+  assert.match(html, /class="note-markdown"/);
   assert.match(html, /class="note-input"/);
   assert.doesNotMatch(html, /window-controls/);
   assert.doesNotMatch(html, /detail-toolbar/);
@@ -100,6 +102,9 @@ test('book page layout fills the viewport without decorative frames', () => {
   assert.match(APP_CSS, /\.reader-shell\s*{[^}]*margin: 0/s);
   assert.match(APP_CSS, /\.sidebar-resizer,\s*\.note-list-resizer\s*{/s);
   assert.match(APP_CSS, /cursor: col-resize/);
+  assert.match(APP_CSS, /\.section-label\s*{/);
+  assert.match(APP_CSS, /\.quote-block\s*{[^}]*background: #f7f7f5/s);
+  assert.match(APP_CSS, /\.note-markdown\s*{[^}]*border-top: 1px solid var\(--line\)/s);
   assert.match(APP_CSS, /\.note-input\s*{[^}]*min-height: 320px/s);
   assert.match(APP_CSS, /\.note-input\s*{[^}]*border: 0/s);
   assert.doesNotMatch(APP_CSS, /\.window-controls/);
