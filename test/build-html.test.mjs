@@ -116,6 +116,22 @@ test('renderBookPage shows legacy note-only entries as original text with an emp
   assert.match(html, /<textarea class="note-input" data-note-input aria-label="Markdown note"><\/textarea>/);
 });
 
+test('renderBookPage hides duplicated note text after note-only migration', () => {
+  const migratedBook = {
+    ...books[0],
+    notes: [{
+      ...books[0].notes[0],
+      id: 'note-migrated',
+      quote: 'Standalone Kindle note text.',
+      note: 'Standalone Kindle note text.'
+    }]
+  };
+  const html = renderBookPage(migratedBook, [migratedBook]);
+
+  assert.match(html, /<blockquote>Standalone Kindle note text\.<\/blockquote>/);
+  assert.match(html, /<textarea class="note-input" data-note-input aria-label="Markdown note"><\/textarea>/);
+});
+
 test('book page layout fills the viewport without decorative frames', () => {
   assert.match(APP_CSS, /--library-width: 320px/);
   assert.match(APP_CSS, /--note-list-width: 430px/);

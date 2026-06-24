@@ -19,11 +19,16 @@ function notePositionKey(note) {
 }
 
 function mergeExistingNote(existingNote, incomingNote, now) {
+  const migratedStandaloneNote = !existingNote.quote
+    && existingNote.note
+    && incomingNote.quote === existingNote.note
+    && !incomingNote.note;
+
   return {
     ...incomingNote,
     tags: existingNote.tags || [],
     status: existingNote.status || 'new',
-    note: existingNote.note ?? incomingNote.note ?? '',
+    note: migratedStandaloneNote ? '' : existingNote.note ?? incomingNote.note ?? '',
     extension: existingNote.extension || '',
     createdAt: existingNote.createdAt || now,
     updatedAt: existingNote.updatedAt || existingNote.createdAt || now

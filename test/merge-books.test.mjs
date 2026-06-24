@@ -167,6 +167,54 @@ test('mergeBooks preserves edited note when repeated import changes note id at t
   assert.equal(note.updatedAt, '2026-01-02T00:00:00.000Z');
 });
 
+test('mergeBooks migrates legacy note-only import without duplicating text into editable note', () => {
+  const existing = [{
+    id: 'book-deep-work-cal-newport',
+    title: 'Deep Work',
+    author: 'Cal Newport',
+    source: 'kindle',
+    firstImportedAt: '2026-01-01T00:00:00.000Z',
+    lastImportedAt: '2026-01-01T00:00:00.000Z',
+    notes: [{
+      id: 'note-1',
+      quote: '',
+      location: 'Location 1',
+      page: '',
+      highlightedAt: '',
+      tags: [],
+      status: 'new',
+      note: 'Standalone Kindle note text.',
+      extension: '',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z'
+    }]
+  }];
+
+  const incoming = [{
+    id: 'book-deep-work-cal-newport',
+    title: 'Deep Work',
+    author: 'Cal Newport',
+    source: 'kindle',
+    notes: [{
+      id: 'note-1',
+      quote: 'Standalone Kindle note text.',
+      location: 'Location 1',
+      page: '',
+      highlightedAt: '',
+      tags: [],
+      status: 'new',
+      note: '',
+      extension: ''
+    }]
+  }];
+
+  const result = mergeBooks(existing, incoming, { now });
+  const note = result.books[0].notes[0];
+
+  assert.equal(note.quote, 'Standalone Kindle note text.');
+  assert.equal(note.note, '');
+});
+
 test('mergeBooks does not collapse different highlights that only share a page', () => {
   const existing = [{
     id: 'book-deep-work-cal-newport',
