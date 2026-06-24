@@ -13,7 +13,7 @@ function stampNewNote(note, now) {
 function notePositionKey(note) {
   const location = String(note.location || '').trim();
   const page = String(note.page || '').trim();
-  if (!location && !page) return '';
+  if (!location) return '';
 
   return [location, page].join('|');
 }

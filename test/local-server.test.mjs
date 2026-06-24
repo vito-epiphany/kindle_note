@@ -64,3 +64,72 @@ test('local server imports folder, serves homepage, and writes note edits', asyn
     await close(server);
   }
 });
+
+test('local server preserves concurrent edits to different notes', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'kindle-local-server-concurrent-'));
+  const dataDir = join(root, 'data');
+  const publicDir = join(root, 'public');
+  const importsDir = join(root, 'imports');
+
+  await mkdir(dataDir, { recursive: true });
+  await mkdir(publicDir, { recursive: true });
+  await mkdir(importsDir, { recursive: true });
+  await writeFile(join(dataDir, 'books.json'), `${JSON.stringify([{
+    id: 'book-deep-work-cal-newport',
+    title: 'Deep Work',
+    author: 'Cal Newport',
+    source: 'kindle',
+    notes: [{
+      id: 'note-1',
+      quote: 'First quote.',
+      note: '',
+      location: 'Location 1',
+      page: '',
+      chapter: '',
+      highlightedAt: '',
+      tags: [],
+      status: 'new',
+      extension: ''
+    }, {
+      id: 'note-2',
+      quote: 'Second quote.',
+      note: '',
+      location: 'Location 2',
+      page: '',
+      chapter: '',
+      highlightedAt: '',
+      tags: [],
+      status: 'new',
+      extension: ''
+    }]
+  }], null, 2)}\n`);
+
+  const server = await createLocalServer({ root });
+  const baseUrl = await listen(server);
+
+  try {
+    const [firstResponse, secondResponse] = await Promise.all([
+      fetch(`${baseUrl}/api/notes/note-1`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ note: 'First concurrent edit' })
+      }),
+      fetch(`${baseUrl}/api/notes/note-2`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ note: 'Second concurrent edit' })
+      })
+    ]);
+
+    assert.equal(firstResponse.status, 200);
+    assert.equal(secondResponse.status, 200);
+
+    const savedBooks = JSON.parse(await readFile(join(dataDir, 'books.json'), 'utf8'));
+    const savedNotes = new Map(savedBooks[0].notes.map((note) => [note.id, note.note]));
+
+    assert.equal(savedNotes.get('note-1'), 'First concurrent edit');
+    assert.equal(savedNotes.get('note-2'), 'Second concurrent edit');
+  } finally {
+    await close(server);
+  }
+});

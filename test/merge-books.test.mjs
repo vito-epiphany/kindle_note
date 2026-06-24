@@ -166,3 +166,80 @@ test('mergeBooks preserves edited note when repeated import changes note id at t
   assert.equal(note.createdAt, '2026-01-01T00:00:00.000Z');
   assert.equal(note.updatedAt, '2026-01-02T00:00:00.000Z');
 });
+
+test('mergeBooks does not collapse different highlights that only share a page', () => {
+  const existing = [{
+    id: 'book-deep-work-cal-newport',
+    title: 'Deep Work',
+    author: 'Cal Newport',
+    source: 'kindle',
+    firstImportedAt: '2026-01-01T00:00:00.000Z',
+    lastImportedAt: '2026-01-01T00:00:00.000Z',
+    notes: [{
+      id: 'note-old-1',
+      quote: 'First highlight.',
+      location: '',
+      page: 'Page 8',
+      chapter: 'Focus rituals',
+      highlightedAt: '',
+      tags: [],
+      status: 'new',
+      note: 'Edited first note.',
+      extension: '',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z'
+    }, {
+      id: 'note-old-2',
+      quote: 'Second highlight.',
+      location: '',
+      page: 'Page 8',
+      chapter: 'Focus rituals',
+      highlightedAt: '',
+      tags: [],
+      status: 'new',
+      note: 'Edited second note.',
+      extension: '',
+      createdAt: '2026-01-01T00:00:00.000Z',
+      updatedAt: '2026-01-02T00:00:00.000Z'
+    }]
+  }];
+
+  const incoming = [{
+    id: 'book-deep-work-cal-newport',
+    title: 'Deep Work',
+    author: 'Cal Newport',
+    source: 'kindle',
+    notes: [{
+      id: 'note-new-1',
+      quote: 'First highlight revised.',
+      location: '',
+      page: 'Page 8',
+      chapter: 'Focus rituals',
+      highlightedAt: '',
+      tags: [],
+      status: 'new',
+      note: 'Imported first note.',
+      extension: ''
+    }, {
+      id: 'note-new-2',
+      quote: 'Second highlight revised.',
+      location: '',
+      page: 'Page 8',
+      chapter: 'Focus rituals',
+      highlightedAt: '',
+      tags: [],
+      status: 'new',
+      note: 'Imported second note.',
+      extension: ''
+    }]
+  }];
+
+  const result = mergeBooks(existing, incoming, { now });
+  const notes = result.books[0].notes;
+
+  assert.equal(notes.length, 4);
+  assert.ok(notes.find((note) => note.id === 'note-old-1'));
+  assert.ok(notes.find((note) => note.id === 'note-old-2'));
+  assert.ok(notes.find((note) => note.id === 'note-new-1'));
+  assert.ok(notes.find((note) => note.id === 'note-new-2'));
+});

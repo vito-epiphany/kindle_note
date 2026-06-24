@@ -45,6 +45,16 @@ async function updateNote(root, noteId, noteText) {
   return null;
 }
 
+function createWriteQueue() {
+  let current = Promise.resolve();
+
+  return async function enqueueWrite(task) {
+    const next = current.then(task, task);
+    current = next.catch(() => {});
+    return next;
+  };
+}
+
 async function readRequestJson(request) {
   const chunks = [];
   let size = 0;
@@ -100,6 +110,7 @@ async function serveStatic(root, pathname, response) {
 export async function createLocalServer({ root = process.cwd() } = {}) {
   await scanImportFolder(root);
   await buildSite(root);
+  const enqueueWrite = createWriteQueue();
 
   return createServer(async (request, response) => {
     try {
@@ -125,7 +136,7 @@ export async function createLocalServer({ root = process.cwd() } = {}) {
           return;
         }
 
-        const saved = await updateNote(root, decodeURIComponent(noteMatch[1]), body.note);
+        const saved = await enqueueWrite(() => updateNote(root, decodeURIComponent(noteMatch[1]), body.note));
         if (!saved) {
           sendJson(response, 404, { error: 'Note not found' });
           return;
