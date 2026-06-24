@@ -241,24 +241,62 @@ function noteStorageKey(noteId) {
   return 'kindle-note:' + noteId + ':note';
 }
 
+function canSaveToServer() {
+  return window.location.protocol === 'http:' || window.location.protocol === 'https:';
+}
+
+function saveNoteFallback(noteId, value) {
+  try {
+    localStorage.setItem(noteStorageKey(noteId), value);
+  } catch {
+    // Editing still works for the current page even without persisted storage.
+  }
+}
+
+async function saveNoteToServer(noteId, value) {
+  const response = await fetch('/api/notes/' + encodeURIComponent(noteId), {
+    method: 'PATCH',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ note: value })
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to save note');
+  }
+
+  return response.json();
+}
+
+const noteSaveTimers = new Map();
+
+function scheduleNoteSave(noteId, value) {
+  if (!canSaveToServer()) {
+    saveNoteFallback(noteId, value);
+    return;
+  }
+
+  window.clearTimeout(noteSaveTimers.get(noteId));
+  noteSaveTimers.set(noteId, window.setTimeout(() => {
+    saveNoteToServer(noteId, value).catch(() => saveNoteFallback(noteId, value));
+  }, 350));
+}
+
 for (const note of document.querySelectorAll('[data-note-id]')) {
   const input = note.querySelector('[data-note-input]');
   if (!input) continue;
 
-  try {
-    const savedNote = localStorage.getItem(noteStorageKey(note.dataset.noteId));
-    if (savedNote !== null) {
-      input.value = savedNote;
+  if (!canSaveToServer()) {
+    try {
+      const savedNote = localStorage.getItem(noteStorageKey(note.dataset.noteId));
+      if (savedNote !== null) {
+        input.value = savedNote;
+      }
+    } catch {
+      // Local files can run in browser modes where storage is unavailable.
     }
-  } catch {
-    // Local files can run in browser modes where storage is unavailable.
   }
 
   input.addEventListener('input', () => {
-    try {
-      localStorage.setItem(noteStorageKey(note.dataset.noteId), input.value);
-    } catch {
-      // Editing still works for the current page even without persisted storage.
-    }
+    scheduleNoteSave(note.dataset.noteId, input.value);
   });
 }

@@ -6,9 +6,35 @@ import { join } from 'node:path';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
+import { scanImportFolder } from '../scripts/lib/import-library.mjs';
 
 const execFileAsync = promisify(execFile);
 const scriptPath = fileURLToPath(new URL('../scripts/import-notes.mjs', import.meta.url));
+
+test('scanImportFolder imports notes through reusable library API', async () => {
+  const tempDir = await mkdtemp(join(tmpdir(), 'kindle-import-library-'));
+  const importsDir = join(tempDir, 'imports');
+  const dataDir = join(tempDir, 'data');
+
+  await mkdir(importsDir, { recursive: true });
+  await mkdir(dataDir, { recursive: true });
+  await writeFile(join(importsDir, 'library.txt'), [
+    'Deep Work',
+    'Cal Newport',
+    '',
+    'Highlight (Location 42)',
+    'Focus deeply on cognitively demanding tasks.'
+  ].join('\n'));
+
+  const result = await scanImportFolder(tempDir);
+  const books = JSON.parse(await readFile(join(dataDir, 'books.json'), 'utf8'));
+
+  assert.equal(result.scannedFiles, 1);
+  assert.equal(result.importedFiles, 1);
+  assert.equal(result.parsedNotes, 1);
+  assert.equal(books.length, 1);
+  assert.equal(books[0].title, 'Deep Work');
+});
 
 test('importer keeps processing after a per-file failure', async () => {
   const tempDir = await mkdtemp(join(tmpdir(), 'kindle-import-'));

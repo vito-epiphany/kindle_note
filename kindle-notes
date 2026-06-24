@@ -22,7 +22,7 @@ case "$COMMAND" in
     ;;
   serve)
     PORT="${1:-4173}"
-    python3 -m http.server "$PORT" --directory public
+    node scripts/serve-local.mjs "$PORT"
     ;;
   test)
     node --test test/*.test.mjs
@@ -35,7 +35,7 @@ Commands:
   import   Import Kindle note files from imports/
   build    Generate static HTML into public/
   refresh  Import notes, then rebuild static HTML
-  serve    Serve public/ locally on port 4173
+  serve    Serve the local app and save edits to data/books.json
   test     Run the local test suite
   help     Show this help
 EOF

@@ -12,7 +12,7 @@ test('project command exposes import build serve without npm', async () => {
   assert.match(stdout, /Usage: \.\/kindle-notes <command>/);
   assert.match(stdout, /import\s+Import Kindle note files/);
   assert.match(stdout, /build\s+Generate static HTML/);
-  assert.match(stdout, /serve\s+Serve public\/ locally/);
+  assert.match(stdout, /serve\s+Serve the local app and save edits/);
   assert.doesNotMatch(stdout, /npm/);
 });
 

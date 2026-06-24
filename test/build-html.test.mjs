@@ -239,6 +239,9 @@ test('app asset includes markdown note editing and export behavior', () => {
   assert.match(APP_JS, /addEventListener\('input'/);
   assert.match(APP_JS, /localStorage\.getItem/);
   assert.match(APP_JS, /localStorage\.setItem/);
+  assert.match(APP_JS, /fetch\('\/api\/notes\/'/);
+  assert.match(APP_JS, /saveNoteToServer/);
+  assert.match(APP_JS, /saveNoteFallback/);
   assert.doesNotMatch(APP_JS, /editedNotes/);
   assert.doesNotMatch(APP_JS, /function renderMarkdown/);
   assert.doesNotMatch(APP_JS, /escapeHtml/);
