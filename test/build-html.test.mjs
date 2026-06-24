@@ -99,6 +99,23 @@ test('renderBookPage escapes content and renders editable note fields', () => {
   assert.doesNotMatch(html, /id="books-data"/);
 });
 
+test('renderBookPage shows legacy note-only entries as original text with an empty note editor', () => {
+  const legacyBook = {
+    ...books[0],
+    notes: [{
+      ...books[0].notes[0],
+      id: 'note-legacy',
+      quote: '',
+      note: 'Standalone Kindle note text.'
+    }]
+  };
+  const html = renderBookPage(legacyBook, [legacyBook]);
+
+  assert.match(html, /class="quote-block"/);
+  assert.match(html, /<blockquote>Standalone Kindle note text\.<\/blockquote>/);
+  assert.match(html, /<textarea class="note-input" data-note-input aria-label="Markdown note"><\/textarea>/);
+});
+
 test('book page layout fills the viewport without decorative frames', () => {
   assert.match(APP_CSS, /--library-width: 320px/);
   assert.match(APP_CSS, /--note-list-width: 430px/);
