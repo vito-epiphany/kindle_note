@@ -159,6 +159,14 @@ test('book page layout fills the viewport without decorative frames', () => {
   assert.doesNotMatch(APP_CSS, /\.note-preview/);
 });
 
+test('note list items show one summary line and one location line', () => {
+  assert.match(APP_CSS, /\.note-list-item\s*{[^}]*min-height: auto/s);
+  assert.match(APP_CSS, /\.note-list-item span\s*{[^}]*white-space: nowrap/s);
+  assert.match(APP_CSS, /\.note-list-item span\s*{[^}]*overflow: hidden/s);
+  assert.match(APP_CSS, /\.note-list-item span\s*{[^}]*text-overflow: ellipsis/s);
+  assert.doesNotMatch(APP_CSS, /-webkit-line-clamp: 2/);
+});
+
 test('sidebar sections are collapsible and typographic hierarchy is explicit', () => {
   assert.match(APP_CSS, /\.section-toggle\s*{[^}]*color: var\(--rail-text\)/s);
   assert.match(APP_CSS, /\.section-toggle\s*{[^}]*font-size: 14px/s);

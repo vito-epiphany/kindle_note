@@ -276,14 +276,14 @@ textarea:focus {
 .note-list-item {
   display: grid;
   width: 100%;
-  min-height: 118px;
-  gap: 6px;
+  min-height: auto;
+  gap: 4px;
   border: 0;
   border-left: 4px solid transparent;
   border-radius: 8px;
   background: transparent;
   color: var(--text);
-  padding: 14px 16px;
+  padding: 12px 16px;
   text-align: left;
 }
 
@@ -294,18 +294,23 @@ textarea:focus {
 }
 
 .note-list-item span {
-  display: -webkit-box;
+  display: block;
   color: #696969;
   font-size: 14px;
   line-height: 1.45;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
 }
 
 .note-list-item small,
 .meta {
   color: var(--muted);
   font-size: 13px;
+}
+
+.note-list-item small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .detail-pane {
