@@ -2,6 +2,8 @@
 
 一个本地 Kindle 读书笔记管理工具。它可以导入 Kindle 导出的 `.txt`、`.html`、`.eml` 笔记文件，整理成可浏览的本地 HTML 页面，并支持在浏览器里编辑 Markdown 笔记，编辑结果会写回本地 JSON 数据。
 
+![Kindle Note 阅读界面](docs/assets/reader-preview.png)
+
 ## 功能
 
 - 从 `imports/` 文件夹导入 Kindle 笔记文件。
