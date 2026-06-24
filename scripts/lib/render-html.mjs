@@ -219,6 +219,7 @@ export function renderBookPage(book, allBooks = [book]) {
       </header>
       <section class="note-list">${noteList}</section>
     </aside>
+    <div class="note-list-resizer" data-note-list-resizer role="separator" aria-label="调整笔记列表宽度" aria-orientation="vertical" tabindex="0"></div>
     <section class="detail-pane">
       <section class="notes">${notes}</section>
     </section>

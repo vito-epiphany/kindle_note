@@ -15,6 +15,7 @@ export const APP_CSS = `:root {
   --accent-soft: #fff0f2;
   --shadow: 0 24px 70px rgba(37, 39, 41, 0.18);
   --library-width: 320px;
+  --note-list-width: 430px;
 }
 
 * {
@@ -96,7 +97,7 @@ textarea:focus {
 
 .reader-shell {
   display: grid;
-  grid-template-columns: var(--library-width) 8px 430px minmax(0, 1fr);
+  grid-template-columns: var(--library-width) 8px var(--note-list-width) 8px minmax(0, 1fr);
   min-height: 100vh;
   margin: 0;
   overflow: hidden;
@@ -117,7 +118,8 @@ textarea:focus {
   padding: 30px 18px 24px;
 }
 
-.sidebar-resizer {
+.sidebar-resizer,
+.note-list-resizer {
   position: relative;
   width: 8px;
   min-width: 8px;
@@ -127,7 +129,8 @@ textarea:focus {
   touch-action: none;
 }
 
-.sidebar-resizer::before {
+.sidebar-resizer::before,
+.note-list-resizer::before {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -140,7 +143,10 @@ textarea:focus {
 
 .sidebar-resizer:hover::before,
 .sidebar-resizer:focus-visible::before,
-.reader-shell[data-resizing-sidebar="true"] .sidebar-resizer::before {
+.note-list-resizer:hover::before,
+.note-list-resizer:focus-visible::before,
+.reader-shell[data-resizing-sidebar="true"] .sidebar-resizer::before,
+.reader-shell[data-resizing-note-list="true"] .note-list-resizer::before {
   background: var(--accent);
   opacity: 1;
 }
@@ -400,7 +406,7 @@ pre {
 
 @media (max-width: 1020px) {
   .reader-shell {
-    grid-template-columns: var(--library-width) 8px minmax(300px, 380px) minmax(0, 1fr);
+    grid-template-columns: var(--library-width) 8px var(--note-list-width) 8px minmax(0, 1fr);
   }
 
   .detail-pane {
@@ -421,12 +427,14 @@ pre {
 
   .library-pane,
   .sidebar-resizer,
+  .note-list-resizer,
   .note-list-pane,
   .detail-pane {
     overflow: visible;
   }
 
-  .sidebar-resizer {
+  .sidebar-resizer,
+  .note-list-resizer {
     display: none;
   }
 
@@ -444,6 +452,7 @@ pre {
 export const APP_JS = `const search = document.querySelector('#search');
 const readerShell = document.querySelector('[data-reader-shell]');
 const sidebarResizer = document.querySelector('[data-sidebar-resizer]');
+const noteListResizer = document.querySelector('[data-note-list-resizer]');
 const chapterButtons = [...document.querySelectorAll('[data-chapter-filter]')];
 const noteListItems = [...document.querySelectorAll('[data-note-target]')];
 const detailCards = [...document.querySelectorAll('.detail-card[data-note-id]')];
@@ -453,6 +462,10 @@ let activeSearchQuery = '';
 
 function clampSidebarWidth(value) {
   return Math.min(460, Math.max(220, Math.round(value)));
+}
+
+function clampNoteListWidth(value) {
+  return Math.min(620, Math.max(300, Math.round(value)));
 }
 
 function setSidebarWidth(value, options = {}) {
@@ -465,6 +478,21 @@ function setSidebarWidth(value, options = {}) {
 
   try {
     localStorage.setItem('kindle-note:library-width', width + 'px');
+  } catch {
+    // Width changes still apply for the current page without persisted storage.
+  }
+}
+
+function setNoteListWidth(value, options = {}) {
+  if (!readerShell) return;
+
+  const width = clampNoteListWidth(value);
+  readerShell.style.setProperty('--note-list-width', width + 'px');
+
+  if (options.persist === false) return;
+
+  try {
+    localStorage.setItem('kindle-note:note-list-width', width + 'px');
   } catch {
     // Width changes still apply for the current page without persisted storage.
   }
@@ -506,6 +534,46 @@ if (readerShell && sidebarResizer) {
     event.preventDefault();
     const currentWidth = Number.parseInt(getComputedStyle(readerShell).getPropertyValue('--library-width'), 10) || 320;
     setSidebarWidth(currentWidth + (event.key === 'ArrowRight' ? 16 : -16));
+  });
+}
+
+if (readerShell && noteListResizer) {
+  try {
+    const savedWidth = localStorage.getItem('kindle-note:note-list-width');
+    if (savedWidth) {
+      setNoteListWidth(Number.parseInt(savedWidth, 10), { persist: false });
+    }
+  } catch {
+    // Local files can run in browser modes where storage is unavailable.
+  }
+
+  noteListResizer.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+    readerShell.dataset.resizingNoteList = 'true';
+    noteListResizer.setPointerCapture?.(event.pointerId);
+
+    const startX = event.clientX;
+    const startWidth = Number.parseInt(getComputedStyle(readerShell).getPropertyValue('--note-list-width'), 10) || 430;
+    const updateFromPointer = (pointerEvent) => {
+      setNoteListWidth(startWidth + pointerEvent.clientX - startX);
+    };
+    const stopResize = () => {
+      delete readerShell.dataset.resizingNoteList;
+      window.removeEventListener('pointermove', updateFromPointer);
+    };
+
+    updateFromPointer(event);
+    window.addEventListener('pointermove', updateFromPointer);
+    window.addEventListener('pointerup', stopResize, { once: true });
+    window.addEventListener('pointercancel', stopResize, { once: true });
+  });
+
+  noteListResizer.addEventListener('keydown', (event) => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+
+    event.preventDefault();
+    const currentWidth = Number.parseInt(getComputedStyle(readerShell).getPropertyValue('--note-list-width'), 10) || 430;
+    setNoteListWidth(currentWidth + (event.key === 'ArrowRight' ? 16 : -16));
   });
 }
 
