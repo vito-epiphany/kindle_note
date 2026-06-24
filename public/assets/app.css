@@ -124,31 +124,25 @@ textarea:focus {
   width: 8px;
   min-width: 8px;
   border: 0;
-  background: var(--paper);
   cursor: col-resize;
   touch-action: none;
 }
 
-.sidebar-resizer::before,
-.note-list-resizer::before {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 3px;
-  width: 1px;
-  background: var(--line);
-  content: "";
-  opacity: 0.75;
+.sidebar-resizer {
+  background: var(--rail);
 }
 
-.sidebar-resizer:hover::before,
-.sidebar-resizer:focus-visible::before,
-.note-list-resizer:hover::before,
-.note-list-resizer:focus-visible::before,
-.reader-shell[data-resizing-sidebar="true"] .sidebar-resizer::before,
-.reader-shell[data-resizing-note-list="true"] .note-list-resizer::before {
-  background: var(--accent);
-  opacity: 1;
+.note-list-resizer {
+  background: var(--paper);
+}
+
+.sidebar-resizer:hover,
+.sidebar-resizer:focus-visible,
+.note-list-resizer:hover,
+.note-list-resizer:focus-visible,
+.reader-shell[data-resizing-sidebar="true"] .sidebar-resizer,
+.reader-shell[data-resizing-note-list="true"] .note-list-resizer {
+  background: rgba(230, 82, 94, 0.1);
 }
 
 .library-section {
@@ -260,7 +254,6 @@ textarea:focus {
   flex-direction: column;
   gap: 14px;
   overflow: auto;
-  border-right: 1px solid var(--line);
   background: var(--paper);
   padding: 26px 20px;
 }
@@ -454,7 +447,6 @@ pre {
   }
 
   .note-list-pane {
-    border-right: 0;
     border-bottom: 1px solid var(--line);
   }
 }
