@@ -462,15 +462,46 @@ const chapterButtons = [...document.querySelectorAll('[data-chapter-filter]')];
 const noteListItems = [...document.querySelectorAll('[data-note-target]')];
 const detailCards = [...document.querySelectorAll('.detail-card[data-note-id]')];
 const collapseButtons = [...document.querySelectorAll('[data-collapse-target]')];
+const minimumDetailWidth = 420;
+const resizerWidthTotal = 16;
 let activeChapter = chapterButtons.find((button) => button.getAttribute('aria-current') === 'true')?.dataset.chapterFilter || chapterButtons[0]?.dataset.chapterFilter || '';
 let activeSearchQuery = '';
 
+function currentPaneWidth(name, fallback) {
+  if (!readerShell) return fallback;
+
+  return Number.parseInt(getComputedStyle(readerShell).getPropertyValue(name), 10) || fallback;
+}
+
+function shellWidth() {
+  return readerShell?.clientWidth || window.innerWidth || 1280;
+}
+
+function maxLibraryWidth() {
+  const noteListWidth = currentPaneWidth('--note-list-width', 430);
+  return Math.max(220, Math.min(460, shellWidth() - noteListWidth - minimumDetailWidth - resizerWidthTotal));
+}
+
+function maxNoteListWidth() {
+  const libraryWidth = currentPaneWidth('--library-width', 320);
+  return Math.max(300, Math.min(620, shellWidth() - libraryWidth - minimumDetailWidth - resizerWidthTotal));
+}
+
 function clampSidebarWidth(value) {
-  return Math.min(460, Math.max(220, Math.round(value)));
+  return Math.min(maxLibraryWidth(), Math.max(220, Math.round(value)));
 }
 
 function clampNoteListWidth(value) {
-  return Math.min(620, Math.max(300, Math.round(value)));
+  return Math.min(maxNoteListWidth(), Math.max(300, Math.round(value)));
+}
+
+function normalizePaneWidths() {
+  if (!readerShell) return;
+
+  const libraryWidth = clampSidebarWidth(currentPaneWidth('--library-width', 320));
+  readerShell.style.setProperty('--library-width', libraryWidth + 'px');
+  const noteListWidth = clampNoteListWidth(currentPaneWidth('--note-list-width', 430));
+  readerShell.style.setProperty('--note-list-width', noteListWidth + 'px');
 }
 
 function setSidebarWidth(value, options = {}) {
@@ -513,6 +544,8 @@ if (readerShell && sidebarResizer) {
     // Local files can run in browser modes where storage is unavailable.
   }
 
+  normalizePaneWidths();
+
   sidebarResizer.addEventListener('pointerdown', (event) => {
     event.preventDefault();
     readerShell.dataset.resizingSidebar = 'true';
@@ -552,6 +585,8 @@ if (readerShell && noteListResizer) {
     // Local files can run in browser modes where storage is unavailable.
   }
 
+  normalizePaneWidths();
+
   noteListResizer.addEventListener('pointerdown', (event) => {
     event.preventDefault();
     readerShell.dataset.resizingNoteList = 'true';
@@ -580,6 +615,10 @@ if (readerShell && noteListResizer) {
     const currentWidth = Number.parseInt(getComputedStyle(readerShell).getPropertyValue('--note-list-width'), 10) || 430;
     setNoteListWidth(currentWidth + (event.key === 'ArrowRight' ? 16 : -16));
   });
+}
+
+if (readerShell) {
+  window.addEventListener('resize', normalizePaneWidths);
 }
 
 function selectNote(noteId) {

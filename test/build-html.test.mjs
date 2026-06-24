@@ -131,14 +131,17 @@ test('app asset includes resizable sidebar behavior', () => {
   assert.match(APP_JS, /data-note-list-resizer/);
   assert.match(APP_JS, /--library-width/);
   assert.match(APP_JS, /--note-list-width/);
+  assert.match(APP_JS, /minimumDetailWidth = 420/);
+  assert.match(APP_JS, /function maxLibraryWidth/);
+  assert.match(APP_JS, /function maxNoteListWidth/);
   assert.match(APP_JS, /localStorage\.getItem\('kindle-note:library-width'\)/);
   assert.match(APP_JS, /localStorage\.setItem\('kindle-note:library-width'/);
   assert.match(APP_JS, /localStorage\.getItem\('kindle-note:note-list-width'\)/);
   assert.match(APP_JS, /localStorage\.setItem\('kindle-note:note-list-width'/);
   assert.match(APP_JS, /pointerdown/);
   assert.match(APP_JS, /pointermove/);
-  assert.match(APP_JS, /Math\.min\(460, Math\.max\(220/);
-  assert.match(APP_JS, /Math\.min\(620, Math\.max\(300/);
+  assert.match(APP_JS, /Math\.min\(maxLibraryWidth\(\), Math\.max\(220/);
+  assert.match(APP_JS, /Math\.min\(maxNoteListWidth\(\), Math\.max\(300/);
 });
 
 test('renderBookPage sorts chapters and notes by chapter order', () => {
