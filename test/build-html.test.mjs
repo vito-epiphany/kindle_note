@@ -1,0 +1,305 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
+import { fileURLToPath } from 'node:url';
+import { renderBookPage, renderIndexPage } from '../scripts/lib/render-html.mjs';
+import { APP_CSS, APP_JS } from '../scripts/lib/site-assets.mjs';
+
+const execFileAsync = promisify(execFile);
+const buildScriptPath = fileURLToPath(new URL('../scripts/build-html.mjs', import.meta.url));
+
+const books = [{
+  id: 'book-deep-work-cal-newport',
+  title: 'Deep Work',
+  author: 'Cal Newport',
+  source: 'kindle',
+  firstImportedAt: '2026-06-23T00:00:00.000Z',
+  lastImportedAt: '2026-06-23T00:00:00.000Z',
+  notes: [{
+    id: 'note-1',
+    quote: 'Focus deeply on cognitively demanding tasks.',
+    location: 'Location 42',
+    page: '',
+    highlightedAt: '',
+    tags: ['attention'],
+    status: 'expanded',
+    note: 'Connect this to planning blocks.',
+    extension: '',
+    chapter: 'Focus rituals',
+    createdAt: '2026-06-23T00:00:00.000Z',
+    updatedAt: '2026-06-23T00:00:00.000Z'
+  }]
+}];
+
+test('renderIndexPage includes search and book links', () => {
+  const html = renderIndexPage(books);
+  assert.match(html, /<input[^>]+id="search"/);
+  assert.match(html, /Deep Work/);
+  assert.match(html, /books\/book-deep-work-cal-newport.html/);
+  assert.match(html, /Last import:/);
+  assert.match(html, /2026-06-23 00:00 UTC/);
+});
+
+test('renderBookPage escapes content and renders editable note fields', () => {
+  const html = renderBookPage(books[0], books);
+  assert.match(html, /Focus deeply on cognitively demanding tasks\./);
+  assert.match(html, /Connect this to planning blocks\./);
+  assert.match(html, /attention/);
+  assert.doesNotMatch(renderBookPage({ ...books[0], title: '<script>' }), /<script>/);
+  assert.match(html, /data-note-id="note-1"/);
+  assert.doesNotMatch(html, /data-note-source=/);
+  assert.doesNotMatch(html, />读书笔记</);
+  assert.doesNotMatch(html, />原文标注</);
+  assert.doesNotMatch(html, /class="eyebrow"/);
+  assert.doesNotMatch(html, /class="detail-header"/);
+  assert.match(html, /class="reader-shell"/);
+  assert.match(html, /data-reader-shell/);
+  assert.match(html, /class="library-pane"/);
+  assert.match(html, /class="sidebar-resizer"/);
+  assert.match(html, /aria-label="调整侧边栏宽度"/);
+  assert.match(html, /class="note-list-pane"/);
+  assert.match(html, /class="note-list-resizer"/);
+  assert.match(html, /data-note-list-resizer/);
+  assert.match(html, /aria-label="调整笔记列表宽度"/);
+  assert.match(html, /class="detail-pane"/);
+  assert.match(html, /data-collapse-target="books"/);
+  assert.match(html, /data-collapse-target="chapters"/);
+  assert.match(html, /data-collapse-panel="books"/);
+  assert.match(html, /data-collapse-panel="chapters"/);
+  assert.match(html, /data-chapter="Focus rituals"/);
+  assert.match(html, /Focus rituals/);
+  assert.doesNotMatch(html, /<small>Focus rituals · Location 42<\/small>/);
+  assert.doesNotMatch(html, /<p class="meta">Focus rituals · Location 42/);
+  assert.match(html, /<small>Location 42<\/small>/);
+  assert.doesNotMatch(html, /<p class="meta">Location 42<\/p>/);
+  assert.doesNotMatch(html, /<button type="button" class="chapter-link"[^>]*>\s*<span>Focus rituals<\/span>\s*<small>/);
+  assert.match(html, /class="quote-block"/);
+  assert.doesNotMatch(html, /class="section-label"/);
+  assert.doesNotMatch(html, />原文</);
+  assert.doesNotMatch(html, />笔记</);
+  assert.match(html, /class="note-markdown"/);
+  assert.match(html, /class="note-input"/);
+  assert.doesNotMatch(html, /window-controls/);
+  assert.doesNotMatch(html, /detail-toolbar/);
+  assert.doesNotMatch(html, /class="note-preview"/);
+  assert.doesNotMatch(html, /class="note-editor"/);
+  assert.doesNotMatch(html, /data-action="edit-note"/);
+  assert.doesNotMatch(html, /data-action="apply-note"/);
+  assert.doesNotMatch(html, /data-action="cancel-note"/);
+  assert.doesNotMatch(html, /extension-preview/);
+  assert.doesNotMatch(html, /id="export-json"/);
+  assert.doesNotMatch(html, /class="back-link"/);
+  assert.doesNotMatch(html, /全部图书/);
+  assert.doesNotMatch(html, /class="status"/);
+  assert.doesNotMatch(html, /class="tags"/);
+  assert.doesNotMatch(html, /class="tag"/);
+  assert.doesNotMatch(html, /id="books-data"/);
+});
+
+test('renderBookPage keeps note-only entries out of original text', () => {
+  const legacyBook = {
+    ...books[0],
+    notes: [{
+      ...books[0].notes[0],
+      id: 'note-legacy',
+      quote: '',
+      note: 'Standalone Kindle note text.'
+    }]
+  };
+  const html = renderBookPage(legacyBook, [legacyBook]);
+
+  assert.doesNotMatch(html, /class="quote-block"/);
+  assert.doesNotMatch(html, /<blockquote>Standalone Kindle note text\.<\/blockquote>/);
+  assert.match(html, /<textarea class="note-input" data-note-input aria-label="Markdown note">Standalone Kindle note text\.<\/textarea>/);
+});
+
+test('renderBookPage treats quote and note as separate fields', () => {
+  const migratedBook = {
+    ...books[0],
+    notes: [{
+      ...books[0].notes[0],
+      id: 'note-migrated',
+      quote: 'Standalone Kindle note text.',
+      note: 'Standalone Kindle note text.'
+    }]
+  };
+  const html = renderBookPage(migratedBook, [migratedBook]);
+
+  assert.match(html, /<blockquote>Standalone Kindle note text\.<\/blockquote>/);
+  assert.match(html, /<textarea class="note-input" data-note-input aria-label="Markdown note">Standalone Kindle note text\.<\/textarea>/);
+});
+
+test('book page layout fills the viewport without decorative frames', () => {
+  assert.match(APP_CSS, /--library-width: 320px/);
+  assert.match(APP_CSS, /--note-list-width: 430px/);
+  assert.match(APP_CSS, /\.reader-shell\s*{[^}]*grid-template-columns: var\(--library-width\) 8px var\(--note-list-width\) 8px minmax\(0, 1fr\)/s);
+  assert.match(APP_CSS, /\.reader-shell\s*{[^}]*min-height: 100vh/s);
+  assert.match(APP_CSS, /\.reader-shell\s*{[^}]*margin: 0/s);
+  assert.match(APP_CSS, /\.sidebar-resizer,\s*\.note-list-resizer\s*{/s);
+  assert.match(APP_CSS, /cursor: col-resize/);
+  assert.doesNotMatch(APP_CSS, /\.note-list-pane\s*{[^}]*border-right:/s);
+  assert.doesNotMatch(APP_CSS, /\.sidebar-resizer::before,\s*\.note-list-resizer::before\s*{/s);
+  assert.match(APP_CSS, /\.sidebar-resizer\s*{[^}]*background: var\(--rail\)/s);
+  assert.match(APP_CSS, /\.note-list-resizer\s*{[^}]*background: var\(--paper\)/s);
+  assert.doesNotMatch(APP_CSS, /\.section-label\s*{/);
+  assert.match(APP_CSS, /\.detail-pane\s*{[^}]*padding: 52px min\(5vw, 72px\) 48px/s);
+  assert.match(APP_CSS, /\.detail-card\s*{[^}]*max-width: 900px/s);
+  assert.doesNotMatch(APP_CSS, /\.quote-block\s*{[^}]*background: #f7f7f5/s);
+  assert.match(APP_CSS, /\.quote-block\s*{[^}]*border-left: 4px solid var\(--accent\)/s);
+  assert.match(APP_CSS, /\.quote-block\s*{[^}]*padding: 4px 0 4px 18px/s);
+  assert.doesNotMatch(APP_CSS, /\.note-markdown\s*{[^}]*border:/s);
+  assert.doesNotMatch(APP_CSS, /\.note-markdown\s*{[^}]*background:/s);
+  assert.match(APP_CSS, /\.note-input\s*{[^}]*min-height: 280px/s);
+  assert.match(APP_CSS, /\.note-input\s*{[^}]*border: 1px solid var\(--line\)/s);
+  assert.match(APP_CSS, /\.note-input\s*{[^}]*background: #fbfbfa/s);
+  assert.match(APP_CSS, /\.note-input:focus\s*{[^}]*border-color: var\(--accent\)/s);
+  assert.match(APP_CSS, /\.note-input:focus\s*{[^}]*box-shadow: 0 0 0 2px rgba\(230, 82, 94, 0\.12\)/s);
+  assert.doesNotMatch(APP_CSS, /\.window-controls/);
+  assert.doesNotMatch(APP_CSS, /\.detail-toolbar/);
+  assert.doesNotMatch(APP_CSS, /\.detail-header/);
+  assert.doesNotMatch(APP_CSS, /\.eyebrow/);
+  assert.doesNotMatch(APP_CSS, /\.note-preview/);
+});
+
+test('note list items show one summary line and one location line', () => {
+  assert.match(APP_CSS, /\.note-list-item\s*{[^}]*min-height: auto/s);
+  assert.match(APP_CSS, /\.note-list-item span\s*{[^}]*white-space: nowrap/s);
+  assert.match(APP_CSS, /\.note-list-item span\s*{[^}]*overflow: hidden/s);
+  assert.match(APP_CSS, /\.note-list-item span\s*{[^}]*text-overflow: ellipsis/s);
+  assert.doesNotMatch(APP_CSS, /-webkit-line-clamp: 2/);
+});
+
+test('sidebar sections are collapsible and typographic hierarchy is explicit', () => {
+  assert.match(APP_CSS, /\.section-toggle\s*{[^}]*color: var\(--rail-text\)/s);
+  assert.match(APP_CSS, /\.section-toggle\s*{[^}]*font-size: 14px/s);
+  assert.match(APP_CSS, /\.section-toggle\s*{[^}]*font-weight: 900/s);
+  assert.match(APP_CSS, /\.section-toggle::after\s*{/);
+  assert.match(APP_CSS, /\.section-toggle::after\s*{[^}]*grid-column: 2/s);
+  assert.match(APP_CSS, /\.section-toggle::after\s*{[^}]*background: rgba\(243, 244, 242, 0\.22\)/s);
+  assert.match(APP_CSS, /\.section-toggle span:last-child\s*{[^}]*grid-column: 3/s);
+  assert.match(APP_CSS, /\.library-book span\s*{[^}]*font-size: 15px/s);
+  assert.match(APP_CSS, /\.library-book small\s*{[^}]*font-size: 12px/s);
+  assert.match(APP_CSS, /\.chapter-link span\s*{[^}]*font-size: 13px/s);
+  assert.doesNotMatch(APP_CSS, /\.chapter-link small/);
+  assert.match(APP_JS, /data-collapse-target/);
+  assert.match(APP_JS, /aria-expanded/);
+  assert.match(APP_JS, /data-collapse-panel/);
+});
+
+test('app asset includes resizable sidebar behavior', () => {
+  assert.match(APP_JS, /data-sidebar-resizer/);
+  assert.match(APP_JS, /data-note-list-resizer/);
+  assert.match(APP_JS, /--library-width/);
+  assert.match(APP_JS, /--note-list-width/);
+  assert.match(APP_JS, /minimumDetailWidth = 420/);
+  assert.match(APP_JS, /function maxLibraryWidth/);
+  assert.match(APP_JS, /function maxNoteListWidth/);
+  assert.match(APP_JS, /localStorage\.getItem\('kindle-note:library-width'\)/);
+  assert.match(APP_JS, /localStorage\.setItem\('kindle-note:library-width'/);
+  assert.match(APP_JS, /localStorage\.getItem\('kindle-note:note-list-width'\)/);
+  assert.match(APP_JS, /localStorage\.setItem\('kindle-note:note-list-width'/);
+  assert.match(APP_JS, /pointerdown/);
+  assert.match(APP_JS, /pointermove/);
+  assert.match(APP_JS, /Math\.min\(maxLibraryWidth\(\), Math\.max\(220/);
+  assert.match(APP_JS, /Math\.min\(maxNoteListWidth\(\), Math\.max\(300/);
+});
+
+test('renderBookPage sorts chapters and notes by chapter order', () => {
+  const outOfOrderBook = {
+    ...books[0],
+    notes: [{
+      ...books[0].notes[0],
+      id: 'note-third',
+      quote: 'Third chapter quote.',
+      note: 'Third note.',
+      chapter: '第三章 返乡',
+      page: '第 39 页',
+      location: '位置 547'
+    }, {
+      ...books[0].notes[0],
+      id: 'note-first',
+      quote: '',
+      note: 'First note.',
+      chapter: '第一章 保就业',
+      page: '第 8 页',
+      location: '位置 87'
+    }, {
+      ...books[0].notes[0],
+      id: 'note-second',
+      quote: 'Second chapter quote.',
+      note: 'Second note.',
+      chapter: '第二章 大学生',
+      page: '第 24 页',
+      location: '位置 314'
+    }]
+  };
+  const html = renderBookPage(outOfOrderBook, [outOfOrderBook]);
+
+  assert.ok(html.indexOf('data-chapter-filter="第一章 保就业"') < html.indexOf('data-chapter-filter="第二章 大学生"'));
+  assert.ok(html.indexOf('data-chapter-filter="第二章 大学生"') < html.indexOf('data-chapter-filter="第三章 返乡"'));
+  assert.ok(html.indexOf('data-note-target="note-first"') < html.indexOf('data-note-target="note-second"'));
+  assert.ok(html.indexOf('data-note-target="note-second"') < html.indexOf('data-note-target="note-third"'));
+  assert.ok(html.indexOf('data-note-id="note-first"') < html.indexOf('data-note-id="note-second"'));
+  assert.ok(html.indexOf('data-note-id="note-second"') < html.indexOf('data-note-id="note-third"'));
+});
+
+test('build-html removes stale book pages that are no longer in books.json', async () => {
+  const tempDir = await mkdtemp(join(tmpdir(), 'kindle-build-'));
+  const dataDir = join(tempDir, 'data');
+  const publicDir = join(tempDir, 'public');
+  const booksDir = join(publicDir, 'books');
+
+  await mkdir(dataDir, { recursive: true });
+  await mkdir(booksDir, { recursive: true });
+
+  await writeFile(join(dataDir, 'books.json'), `${JSON.stringify([books[0]], null, 2)}\n`);
+  await writeFile(join(booksDir, 'book-old-title.html'), '<!doctype html><title>stale</title>');
+
+  const { stdout } = await execFileAsync('node', [buildScriptPath], { cwd: tempDir });
+
+  await assert.doesNotReject(readFile(join(publicDir, 'index.html'), 'utf8'));
+  await assert.doesNotReject(readFile(join(booksDir, 'book-deep-work-cal-newport.html'), 'utf8'));
+  await assert.rejects(readFile(join(booksDir, 'book-old-title.html'), 'utf8'), { code: 'ENOENT' });
+  assert.match(stdout, /Built 1 book page\(s\)\./);
+});
+
+test('build-html rebuilds referenced app assets from data/books.json', async () => {
+  const tempDir = await mkdtemp(join(tmpdir(), 'kindle-build-assets-'));
+  const dataDir = join(tempDir, 'data');
+  const publicDir = join(tempDir, 'public');
+  const assetsDir = join(publicDir, 'assets');
+
+  await mkdir(dataDir, { recursive: true });
+  await mkdir(assetsDir, { recursive: true });
+  await writeFile(join(dataDir, 'books.json'), `${JSON.stringify([books[0]], null, 2)}\n`);
+
+  const { stdout } = await execFileAsync('node', [buildScriptPath], { cwd: tempDir });
+  const css = await readFile(join(assetsDir, 'app.css'), 'utf8');
+  const js = await readFile(join(assetsDir, 'app.js'), 'utf8');
+
+  assert.match(css, /--accent:/);
+  assert.match(js, /search/i);
+  assert.match(stdout, /Built 1 book page\(s\)\./);
+});
+
+test('app asset includes markdown note editing and export behavior', () => {
+  assert.match(APP_JS, /addEventListener\('input'/);
+  assert.match(APP_JS, /localStorage\.getItem/);
+  assert.match(APP_JS, /localStorage\.setItem/);
+  assert.match(APP_JS, /fetch\('\/api\/notes\/'/);
+  assert.match(APP_JS, /saveNoteToServer/);
+  assert.match(APP_JS, /saveNoteFallback/);
+  assert.doesNotMatch(APP_JS, /editedNotes/);
+  assert.doesNotMatch(APP_JS, /function renderMarkdown/);
+  assert.doesNotMatch(APP_JS, /escapeHtml/);
+  assert.doesNotMatch(APP_JS, /edit-note/);
+  assert.doesNotMatch(APP_JS, /apply-note/);
+  assert.doesNotMatch(APP_JS, /cancel-note/);
+  assert.doesNotMatch(APP_JS, /export-json/);
+  assert.doesNotMatch(APP_JS, /new Blob/);
+  assert.doesNotMatch(APP_JS, /editedExtensions/);
+});
