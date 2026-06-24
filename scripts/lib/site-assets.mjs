@@ -356,8 +356,11 @@ textarea:focus {
 .note-markdown {
   display: grid;
   gap: 14px;
+  border: 1px solid var(--line);
   border-top: 1px solid var(--line);
-  padding-top: 22px;
+  border-radius: 8px;
+  background: #fbfbfa;
+  padding: 18px 20px 20px;
 }
 
 blockquote {
@@ -374,10 +377,10 @@ blockquote {
   width: 100%;
   min-height: 320px;
   resize: vertical;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  padding: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 14px 16px;
   color: #454545;
   font: inherit;
   font-size: 17px;
@@ -385,7 +388,9 @@ blockquote {
 }
 
 .note-input:focus {
-  outline-offset: 6px;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(230, 82, 94, 0.12);
+  outline: 0;
 }
 
 .note-actions {
